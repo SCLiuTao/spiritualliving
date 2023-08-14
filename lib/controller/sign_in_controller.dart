@@ -50,9 +50,11 @@ class SignInController extends GetxController
 
   void checkLogin() {
     var loginInfo = storageManage.read(Config.loginInfo);
-    Map loginInfoMap = jsonDecode(loginInfo);
-    if (loginInfoMap["islogin"]) {
-      Get.offAndToNamed(Routes.webpage);
+    if (loginInfo != null) {
+      Map loginInfoMap = jsonDecode(loginInfo);
+      if (loginInfoMap["islogin"]) {
+        Get.offAndToNamed(Routes.webpage);
+      }
     }
   }
 
@@ -113,10 +115,13 @@ class SignInController extends GetxController
         }
       } else if (loginType == "apple") {
         UserCredential? auth = await signInWithApple();
+
         if (auth != null) {
           User? user = auth.user;
           if (user != null) {
-            String? firstName = user.displayName;
+            String? firstName = user.displayName!
+                .replaceAll(RegExp(r'\s+'), " ")
+                .replaceAll(" ", "-");
             String? email = user.email;
             loginData = {
               "firstName": firstName,
@@ -168,7 +173,6 @@ class SignInController extends GetxController
         Get.offAndToNamed(Routes.webpage);
       } else if (remoteLoginRet["code"] == 202) {
         //只有普通註冊時，賬號不存在才返回202
-
         iosDialog(
             context: Get.context!,
             content: "賬號不存在，是否繼續註冊",
@@ -239,6 +243,7 @@ class SignInController extends GetxController
   /// facebook登錄
   Future<UserCredential?> signInWithFacebook() async {
     final LoginResult loginResult = await FacebookAuth.instance.login();
+    //print("===========>${loginResult.status}");
     if (loginResult.status == LoginStatus.cancelled) {
       showError("用戶取消登錄");
       return null;
@@ -279,6 +284,16 @@ class SignInController extends GetxController
       return await facebookAuth.logOut();
     } catch (e) {
       return;
+    }
+  }
+
+  Future<void> signInWithTwitter() async {
+    TwitterAuthProvider twitterProvider = TwitterAuthProvider();
+
+    if (kIsWeb) {
+      await FirebaseAuth.instance.signInWithPopup(twitterProvider);
+    } else {
+      await FirebaseAuth.instance.signInWithProvider(twitterProvider);
     }
   }
 }
