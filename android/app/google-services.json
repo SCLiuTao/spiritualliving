@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "539015066127",
+    "project_id": "spiritual-living-auth",
+    "storage_bucket": "spiritual-living-auth.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:539015066127:android:077b7b4226c3b3ded3697a",
+        "android_client_info": {
+          "package_name": "net.spiritualliving"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "539015066127-mvr4notaeblk0n6a4dqtcp6jm9j372hb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "net.spiritualliving",
+            "certificate_hash": "0472105a1cace976629def3b73060a98873ec341"
+          }
+        },
+        {
+          "client_id": "539015066127-kpcp9plarh4q2jc3rj1qea598mi3abue.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPtlN5ld_Hi-6C9IKH9s73LiryLJbaD8o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "539015066127-kpcp9plarh4q2jc3rj1qea598mi3abue.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
