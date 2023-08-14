@@ -92,7 +92,7 @@ Future<UserCredential?> signInWithApple() async {
 ## facebook登录
 #### facebook登录android配置
 1. android/app/build.gradle minSdkVersion修改为22
-   ```dotnetcli
+   ```xml
     defaultConfig {
              // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
              applicationId "net.pericles.spiritualliving"
