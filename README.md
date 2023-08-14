@@ -48,7 +48,7 @@
 3. xcode打开项目右键addrunner添加GoogleService-Info.plist到runner  
   
 4. 打开info.plist添加(SERVER_CLIENT_ID、REVERSED_CLIENT_ID在GoogleService-Info.plist找到并替换)
-   ```info.plist
+   ```xml
    <key>SERVER_CLIENT_ID</key>
    <string>[YOUR SERVER CLIENT ID]</string>
     <key>CFBundleURLTypes</key>
