@@ -59,7 +59,7 @@ showloading(String msg) {
   );
 }
 
-showToast(String msg) {
+showToast(String msg, {Color? textColor}) {
   EasyLoading.instance
     ..indicatorType = EasyLoadingIndicatorType.fadingCircle
     ..loadingStyle = EasyLoadingStyle.custom
@@ -68,7 +68,7 @@ showToast(String msg) {
     ..progressColor = Colors.red
     ..backgroundColor = Colors.black
     ..indicatorColor = Colors.red
-    ..textColor = Colors.red
+    ..textColor = textColor ?? Colors.green
     ..maskColor = Colors.black.withOpacity(0.5)
     ..userInteractions = true
     ..dismissOnTap = false;
