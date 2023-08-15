@@ -181,14 +181,26 @@ class SignIn extends StatelessWidget {
                             signInCtl.handleSignIn(loginType: "apple");
                           },
                         ),
-                        ActionChip(
-                          label: const Icon(Icons.twelve_mp_rounded),
-                          avatar: const Text("推特"),
-                          onPressed: () async {
-                            var ret = await signInCtl.signInWithTwitter();
-                           
 
-                            print("======>${[ret.user!.email,ret.user!.displayName]}");
+                        FormHelper.submitUIButton(
+                          context,
+                          title: "Twitter登錄",
+                          icon: ColorFiltered(
+                            colorFilter: const ColorFilter.mode(
+                                Colors.white, BlendMode.srcIn),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(28),
+                              clipBehavior: Clip.hardEdge,
+                              child: const Image(
+                                image: AssetImage("assets/twitter.png"),
+                                height: 30.0,
+                                width: 30.0,
+                              ),
+                            ),
+                          ),
+                          color: const Color(0xFF00aced),
+                          onTap: () async {
+                            signInCtl.handleSignIn(loginType: "twitter");
                           },
                         ),
                       ],

@@ -64,7 +64,7 @@ class SignInController extends GetxController
     String name = nameCtl.text;
     String pwd = pwdCtl.text;
     loginData = {
-      "firstName": name,
+      "displayName": name,
       "pwd": pwd,
       "loginType": "normal",
     };
@@ -89,12 +89,12 @@ class SignInController extends GetxController
           User? user = auth.user;
           if (user != null) {
             googleWithSignOut();
-            String? firstName = user.displayName!
+            String? displayName = user.displayName!
                 .replaceAll(RegExp(r'\s+'), " ")
                 .replaceAll(" ", "-");
             String? email = user.email;
             loginData = {
-              "firstName": firstName,
+              "displayName": displayName,
               "email": email,
               "loginType": loginType,
             };
@@ -106,12 +106,12 @@ class SignInController extends GetxController
           User? user = auth.user;
           if (user != null) {
             facebookWithSignOut();
-            String? firstName = user.displayName!
+            String? displayName = user.displayName!
                 .replaceAll(RegExp(r'\s+'), " ")
                 .replaceAll(" ", "-");
             String? email = user.email;
             loginData = {
-              "firstName": firstName,
+              "displayName": displayName,
               "email": email,
               "loginType": loginType,
             };
@@ -123,20 +123,33 @@ class SignInController extends GetxController
         if (auth != null) {
           User? user = auth.user;
           if (user != null) {
-            String? firstName = user.displayName;
+            String? displayName = user.displayName;
             String? email = user.email;
             loginData = {
-              "firstName": firstName,
+              "displayName": displayName,
               "email": email,
               "loginType": loginType,
             };
           }
         }
+      } else if (loginType == "twitter") {
+        UserCredential? auth = await signInWithTwitter();
+
+        User? user = auth.user;
+        if (user != null) {
+          String? displayName = user.displayName;
+          String? email = user.email;
+          loginData = {
+            "displayName": displayName,
+            "email": email,
+            "loginType": loginType,
+          };
+        }
       } else if (loginType == "normal") {
         String name = nameCtl.text;
         String pwd = pwdCtl.text;
         loginData = {
-          "firstName": name,
+          "displayName": name,
           "pwd": pwd,
           "loginType": loginType,
         };
@@ -259,6 +272,16 @@ class SignInController extends GetxController
     }
   }
 
+  ///推特登录
+  Future<UserCredential> signInWithTwitter() async {
+    TwitterAuthProvider twitterProvider = TwitterAuthProvider();
+    if (kIsWeb) {
+      return await FirebaseAuth.instance.signInWithPopup(twitterProvider);
+    } else {
+      return await FirebaseAuth.instance.signInWithProvider(twitterProvider);
+    }
+  }
+
   /// apple登錄
   Future<UserCredential?> signInWithApple() async {
     final appleProvider = AppleAuthProvider();
@@ -286,15 +309,6 @@ class SignInController extends GetxController
       return await facebookAuth.logOut();
     } catch (e) {
       return;
-    }
-  }
-
-  Future<UserCredential> signInWithTwitter() async {
-    TwitterAuthProvider twitterProvider = TwitterAuthProvider();
-    if (kIsWeb) {
-      return await FirebaseAuth.instance.signInWithPopup(twitterProvider);
-    } else {
-      return await FirebaseAuth.instance.signInWithProvider(twitterProvider);
     }
   }
 }
