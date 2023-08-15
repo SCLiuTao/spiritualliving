@@ -12,9 +12,9 @@ class SignIn extends StatelessWidget {
   final signInCtl = Get.find<SignInController>();
   @override
   Widget build(BuildContext context) {
-    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-    //   signInCtl.checkLogin();
-    // });
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      signInCtl.checkLogin();
+    });
     final paddingTop = MediaQuery.of(context).padding.top;
     return Scaffold(
       resizeToAvoidBottomInset: true,
