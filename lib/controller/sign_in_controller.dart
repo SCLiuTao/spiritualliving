@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -89,7 +90,9 @@ class SignInController extends GetxController
           User? user = auth.user;
           if (user != null) {
             googleWithSignOut();
-            String? firstName = user.displayName;
+            String? firstName = user.displayName!
+                .replaceAll(RegExp(r'\s+'), " ")
+                .replaceAll(" ", "-");
             String? email = user.email;
             loginData = {
               "firstName": firstName,
@@ -104,7 +107,9 @@ class SignInController extends GetxController
           User? user = auth.user;
           if (user != null) {
             facebookWithSignOut();
-            String? firstName = user.displayName;
+            String? firstName = user.displayName!
+                .replaceAll(RegExp(r'\s+'), " ")
+                .replaceAll(" ", "-");
             String? email = user.email;
             loginData = {
               "firstName": firstName,
@@ -119,9 +124,7 @@ class SignInController extends GetxController
         if (auth != null) {
           User? user = auth.user;
           if (user != null) {
-            String? firstName = user.displayName!
-                .replaceAll(RegExp(r'\s+'), " ")
-                .replaceAll(" ", "-");
+            String? firstName = user.displayName;
             String? email = user.email;
             loginData = {
               "firstName": firstName,
@@ -287,13 +290,12 @@ class SignInController extends GetxController
     }
   }
 
-  Future<void> signInWithTwitter() async {
+  Future<UserCredential> signInWithTwitter() async {
     TwitterAuthProvider twitterProvider = TwitterAuthProvider();
-
     if (kIsWeb) {
-      await FirebaseAuth.instance.signInWithPopup(twitterProvider);
+      return await FirebaseAuth.instance.signInWithPopup(twitterProvider);
     } else {
-      await FirebaseAuth.instance.signInWithProvider(twitterProvider);
+      return await FirebaseAuth.instance.signInWithProvider(twitterProvider);
     }
   }
 }

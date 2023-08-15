@@ -50,7 +50,6 @@ dependencies:
   flutter_staggered_animations: ^1.1.1
   firebase_core: ^2.15.0
   firebase_auth: ^4.7.2
-  webview_cookie_manager: ^2.0.6
 
 dev_dependencies:
   flutter_test:

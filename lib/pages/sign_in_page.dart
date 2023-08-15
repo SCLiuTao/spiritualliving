@@ -12,9 +12,9 @@ class SignIn extends StatelessWidget {
   final signInCtl = Get.find<SignInController>();
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      signInCtl.checkLogin();
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    //   signInCtl.checkLogin();
+    // });
     final paddingTop = MediaQuery.of(context).padding.top;
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -179,6 +179,16 @@ class SignIn extends StatelessWidget {
                           color: Colors.black87,
                           onTap: () async {
                             signInCtl.handleSignIn(loginType: "apple");
+                          },
+                        ),
+                        ActionChip(
+                          label: const Icon(Icons.twelve_mp_rounded),
+                          avatar: const Text("推特"),
+                          onPressed: () async {
+                            var ret = await signInCtl.signInWithTwitter();
+                           
+
+                            print("======>${[ret.user!.email,ret.user!.displayName]}");
                           },
                         ),
                       ],
