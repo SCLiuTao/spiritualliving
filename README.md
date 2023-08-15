@@ -43,7 +43,7 @@
       }
       ```
 
-#### 谷歌登录IOS配置
+### 谷歌登录IOS配置
 
 1. [添加IOS应用](https://console.firebase.google.com/project/spiritual-living-37328/overview?hl=zh-cn)填入应用ID
 2. 下载GoogleService-Info.plist
@@ -67,6 +67,26 @@
     </array>
    ```  
 
+### google调用代码
+
+```dart
+Future<UserCredential?> signInWithGoogle() async {
+  final GoogleSignInAccount? googleSignInAccount =
+      await GoogleSignIn().signIn();
+  if (googleSignInAccount == null) {
+    return null;
+  } else {
+    final GoogleSignInAuthentication googleAuth =
+        await googleSignInAccount.authentication;
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+    return await FirebaseAuth.instance.signInWithCredential(credential);
+  }
+}
+```
+
 ## Apple ID登录
 
 ### IOS配置
@@ -84,7 +104,7 @@
 4. 复制授权回调网址![Alt text](screenshot/image-4.png)
 5. 填入apple开发网上刚建立的services id的重新定向Return URLs处![Alt text](screenshot/image-5.png)
 
-### 调用代码
+### apple调用代码
 
 ```dart
 Future<UserCredential?> signInWithApple() async {
@@ -190,7 +210,7 @@ Future<UserCredential?> signInWithApple() async {
       2. cmd执行 keytool -exportcert -alias sign -keystore "E:\Project\FlutterProject\spiritualliving\android\app\key\sign.jks" | openssl sha1 -binary | openssl base64
 10. firebase启动facebook验证![Alt text](screenshot/allMethod.png)  
 
-#### facebook登录IOS配置
+### facebook登录IOS配置
 
   1. 打开podfile 修改platform :ios, '12.0'
   2. 使用Facebook注册和配置您的应用程序，添加您的Bundle Identifier![Alt text](screenshot/addFacebookID.png)
@@ -222,7 +242,7 @@ Future<UserCredential?> signInWithApple() async {
         </array>
         ```
 
-#### facebook调用代码
+### facebook调用代码
 
  ```dart
  Future<UserCredential?> signInWithFacebook() async {
@@ -249,3 +269,565 @@ Future<UserCredential?> signInWithApple() async {
 3. [firebase](https://console.firebase.google.com/)内Authentication->sign in method 开启twitter,并填写twitter应用key和密钥![twitterkey](screenshot/twitterkey.png)
 4. 复制回调网址，并填写到twitter应用内的Callback URI![twittercalluri](screenshot/twittercalluri.png)
 5. IOS内打开target->info->URL Schemes，并填写编码的应用 ID,编码的应用 ID在firebase ios应用下可找到![twitterencode](screenshot/twitterencode.png)
+
+### 调用代码
+
+```dart
+Future<UserCredential> signInWithTwitter() async {
+  TwitterAuthProvider twitterProvider = TwitterAuthProvider();
+  if (kIsWeb) {
+    return await FirebaseAuth.instance.signInWithPopup(twitterProvider);
+  } else {
+    return await FirebaseAuth.instance.signInWithProvider(twitterProvider);
+  }
+}
+```
+
+## 部分完整代码
+
+### dart controller
+
+```dart
+import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import '../common/serivce/api_client.dart';
+import '../common/config.dart';
+import '../common/utils/easy_toast.dart';
+import '../common/utils/ios_dialog.dart';
+import '../common/utils/storage_manage.dart';
+import '../routes/app_pages.dart';
+
+class SignInController extends GetxController
+    with GetSingleTickerProviderStateMixin {
+  StorageManage storageManage = StorageManage();
+  GlobalKey<FormState> formkey = GlobalKey<FormState>();
+  final TextEditingController nameCtl = TextEditingController();
+  final TextEditingController pwdCtl = TextEditingController();
+  RxBool isShowPassword = true.obs;
+  late AnimationController animationController;
+
+  @override
+  void onInit() {
+    animationController =
+        AnimationController(vsync: this, duration: const Duration(seconds: 2))
+          ..repeat(reverse: true);
+    var loginInfo = storageManage.read(Config.loginInfo);
+    if (loginInfo != null) {
+      Map loginInfoMap = jsonDecode(loginInfo);
+      if (loginInfoMap['loginType'] == "normal") {
+        nameCtl.text = loginInfoMap['user_name'] ?? "";
+        pwdCtl.text = loginInfoMap['user_password'] ?? "";
+      }
+    }
+    isShowPassword.value = true;
+
+    super.onInit();
+  }
+
+  @override
+  void onClose() {
+    animationController.dispose();
+    super.onClose();
+  }
+
+  ///判断登录信息是否存在，且在登录状态时直接进入webview
+
+  void checkLogin() {
+    var loginInfo = storageManage.read(Config.loginInfo);
+    if (loginInfo != null) {
+      Map loginInfoMap = jsonDecode(loginInfo);
+      if (loginInfoMap["islogin"]) {
+        Get.offAndToNamed(Routes.webpage);
+      }
+    }
+  }
+
+  ///普通登錄
+  Future<void> normalLogin() async {
+    Map<String, dynamic>? loginData;
+    String name = nameCtl.text;
+    String pwd = pwdCtl.text;
+    loginData = {
+      "displayName": name,
+      "pwd": pwd,
+      "loginType": "normal",
+    };
+
+    //执行远程登录
+    remoteLogin(
+      data: loginData,
+      loginType: 'normal',
+    );
+  }
+
+  /// 第三方登录
+  /// loginType 登录类型
+
+  Future<void> handleSignIn({required String loginType}) async {
+    Map<String, dynamic>? loginData;
+
+    try {
+      if (loginType == "google") {
+        UserCredential? auth = await signInWithGoogle();
+        if (auth != null) {
+          User? user = auth.user;
+          if (user != null) {
+            googleWithSignOut();
+            String? displayName = user.displayName!
+                .replaceAll(RegExp(r'\s+'), " ")
+                .replaceAll(" ", "-");
+            String? email = user.email;
+            loginData = {
+              "displayName": displayName,
+              "email": email,
+              "loginType": loginType,
+            };
+          }
+        }
+      } else if (loginType == "facebook") {
+        UserCredential? auth = await signInWithFacebook();
+        if (auth != null) {
+          User? user = auth.user;
+          if (user != null) {
+            facebookWithSignOut();
+            String? displayName = user.displayName!
+                .replaceAll(RegExp(r'\s+'), " ")
+                .replaceAll(" ", "-");
+            String? email = user.email;
+            loginData = {
+              "displayName": displayName,
+              "email": email,
+              "loginType": loginType,
+            };
+          }
+        }
+      } else if (loginType == "apple") {
+        UserCredential? auth = await signInWithApple();
+
+        if (auth != null) {
+          User? user = auth.user;
+          if (user != null) {
+            String? displayName = user.displayName;
+            String? email = user.email;
+            loginData = {
+              "displayName": displayName,
+              "email": email,
+              "loginType": loginType,
+            };
+          }
+        }
+      } else if (loginType == "twitter") {
+        UserCredential? auth = await signInWithTwitter();
+
+        User? user = auth.user;
+        if (user != null) {
+          String? displayName = user.displayName;
+          String? email = user.email;
+          loginData = {
+            "displayName": displayName,
+            "email": email,
+            "loginType": loginType,
+          };
+        }
+      } else if (loginType == "normal") {
+        String name = nameCtl.text;
+        String pwd = pwdCtl.text;
+        loginData = {
+          "displayName": name,
+          "pwd": pwd,
+          "loginType": loginType,
+        };
+      }
+      if (loginData != null) {
+        //执行远程登录
+        remoteLogin(
+          data: loginData,
+          loginType: loginType,
+        );
+      }
+    } catch (e) {
+      if (loginType == "google") {
+        googleWithSignOut();
+      }
+      if (loginType == "facebook") {
+        googleWithSignOut();
+      }
+      showError("登錄失敗");
+    }
+  }
+
+  ///远程登录，获取登录信息
+  void remoteLogin(
+      {required Map<String, dynamic> data, required String loginType}) async {
+    if (loginType == "normal") {
+      showloading("登錄中");
+    } else {
+      showloading("授權成功,登錄中");
+    }
+
+    ApiClient apiClient = ApiClient();
+    var ret = await apiClient.post(path: Config.loginUrl, data: data);
+    if (EasyLoading.isShow) {
+      EasyLoading.dismiss();
+    }
+    if (ret != null) {
+      Map<String, dynamic> remoteLoginRet = jsonDecode(ret);
+      if (remoteLoginRet["code"] == 200) {
+        saveRemoteInfo(remoteData: remoteLoginRet, loginType: loginType);
+
+        Get.offAndToNamed(Routes.webpage);
+      } else if (remoteLoginRet["code"] == 202) {
+        //只有普通註冊時，賬號不存在才返回202
+        iosDialog(
+            context: Get.context!,
+            content: "賬號不存在，是否繼續註冊",
+            confirm: () {
+              Get.back(); //關閉對話框
+              showloading("註冊中"); //彈出對話框
+              if (!data.containsKey("isContinue")) {
+                data.putIfAbsent("isContinue", () => true); //添加繼續註冊標識，後台識別
+              }
+              remoteLogin(data: data, loginType: "normal"); //再次調用遠程登錄
+            });
+      } else {
+        if (loginType == "google") {
+          googleWithSignOut();
+        }
+        showError("登錄失敗");
+      }
+    } else {
+      if (loginType == "google") {
+        googleWithSignOut();
+      }
+      if (loginType == "facebook") {
+        googleWithSignOut();
+      }
+      showError("登錄失敗");
+    }
+  }
+
+  ///保存远程信息
+  void saveRemoteInfo({required Map remoteData, required String loginType}) {
+    //print(remoteData);
+    final String cookieName = "wordpress_logged_in_${remoteData["cookieHash"]}";
+    final String cookieValue = remoteData["cookieValue"];
+    final int userID = remoteData["userID"];
+    var loginInfo = {
+      "loginType": loginType,
+      "cookieName": cookieName,
+      "cookieValue": cookieValue,
+      "userID": userID,
+      "islogin": true,
+    };
+    if (loginType == "normal") {
+      //如果是普通登录，存入用户名与密码
+      loginInfo.putIfAbsent("user_name", () => nameCtl.text);
+      loginInfo.putIfAbsent("user_password", () => pwdCtl.text);
+    }
+    storageManage.delete(Config.loginInfo);
+    storageManage.save(Config.loginInfo, jsonEncode(loginInfo));
+  }
+
+  ///google登录，并将信息存储在firebase
+  Future<UserCredential?> signInWithGoogle() async {
+    final GoogleSignInAccount? googleSignInAccount =
+        await GoogleSignIn().signIn();
+    if (googleSignInAccount == null) {
+      return null;
+    } else {
+      final GoogleSignInAuthentication googleAuth =
+          await googleSignInAccount.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      return await FirebaseAuth.instance.signInWithCredential(credential);
+    }
+  }
+
+  /// facebook登錄
+  Future<UserCredential?> signInWithFacebook() async {
+    final LoginResult loginResult = await FacebookAuth.instance.login();
+    //print("===========>${loginResult.status}");
+    if (loginResult.status == LoginStatus.cancelled) {
+      showError("用戶取消登錄");
+      return null;
+    } else if (loginResult.status == LoginStatus.failed) {
+      showError("驗證失敗");
+      return null;
+    } else {
+      final OAuthCredential facebookAuthCredential =
+          FacebookAuthProvider.credential(loginResult.accessToken!.token);
+      return FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
+    }
+  }
+
+  ///推特登录
+  Future<UserCredential> signInWithTwitter() async {
+    TwitterAuthProvider twitterProvider = TwitterAuthProvider();
+    if (kIsWeb) {
+      return await FirebaseAuth.instance.signInWithPopup(twitterProvider);
+    } else {
+      return await FirebaseAuth.instance.signInWithProvider(twitterProvider);
+    }
+  }
+
+  /// apple登錄
+  Future<UserCredential?> signInWithApple() async {
+    final appleProvider = AppleAuthProvider();
+    if (kIsWeb) {
+      return await FirebaseAuth.instance.signInWithPopup(appleProvider);
+    } else {
+      return await FirebaseAuth.instance.signInWithProvider(appleProvider);
+    }
+  }
+
+  ///退出google登录
+  Future<GoogleSignInAccount?> googleWithSignOut() async {
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      return await googleSignIn.signOut();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  ///退出facebook
+  Future<void> facebookWithSignOut() async {
+    try {
+      final FacebookAuth facebookAuth = FacebookAuth.instance;
+      return await facebookAuth.logOut();
+    } catch (e) {
+      return;
+    }
+  }
+}
+```
+
+### dart UI
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:get/get.dart';
+
+import '../common/config.dart';
+import '../common/style/style.dart';
+import '../common/utils/form_help.dart';
+import '../controller/sign_in_controller.dart';
+
+class SignIn extends StatelessWidget {
+  SignIn({super.key});
+  final signInCtl = Get.find<SignInController>();
+  @override
+  Widget build(BuildContext context) {
+    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    //   signInCtl.checkLogin();
+    // });
+    final paddingTop = MediaQuery.of(context).padding.top;
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      body: Container(
+        padding: EdgeInsets.only(
+          top: paddingTop,
+          left: Get.width * 0.08,
+          right: Get.width * 0.08,
+        ),
+        decoration: boxLinear,
+        width: double.infinity,
+        height: double.infinity,
+        child: Form(
+          key: signInCtl.formkey,
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                SlideTransition(
+                  position: Tween(begin: Offset.zero, end: const Offset(0, .1))
+                      .chain(CurveTween(curve: Curves.linear))
+                      .animate(signInCtl.animationController),
+                  child: Container(
+                      constraints: const BoxConstraints(maxHeight: 200.0),
+                      child: Image.asset("assets/splash.png")),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                AnimationLimiter(
+                  child: Column(
+                    children: AnimationConfiguration.toStaggeredList(
+                      duration: const Duration(milliseconds: 375),
+                      childAnimationBuilder: (widget) => SlideAnimation(
+                        horizontalOffset: MediaQuery.of(context).size.width / 2,
+                        child: FadeInAnimation(child: widget),
+                      ),
+                      children: [
+                        ///用戶名或郵箱
+                        FormHelper.textInput(
+                          controller: signInCtl.nameCtl,
+                          labelText: "用戶名或郵箱",
+                          icon: Icons.person,
+                          keyboardType: TextInputType.visiblePassword,
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return "用戶名或郵箱不能為空";
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: Config.space),
+
+                        ///密码
+                        Obx(() => FormHelper.textInput(
+                            controller: signInCtl.pwdCtl,
+                            icon: Icons.lock_outline,
+                            labelText: "密碼",
+                            keyboardType: TextInputType.visiblePassword,
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return '密碼不能為空';
+                              }
+                              return null;
+                            },
+                            obscureText: signInCtl.isShowPassword.value,
+                            suffixIcon: Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: IconButton(
+                                color: Colors.white70,
+                                icon: signInCtl.isShowPassword.value
+                                    ? const Icon(Icons.visibility)
+                                    : const Icon(Icons.visibility_off),
+                                onPressed: () {
+                                  signInCtl.isShowPassword.value =
+                                      !signInCtl.isShowPassword.value;
+                                },
+                              ),
+                            ))),
+
+                        SizedBox(height: Config.space),
+
+                        ///普通登录
+                        FormHelper.submitUIButton(
+                          context,
+                          title: "賬號密碼登錄",
+                          icon: const Icon(Icons.email),
+                          textColor: Colors.black87,
+                          //color: Colors.grey[600],
+                          onTap: () {
+                            FocusScope.of(context).unfocus();
+                            var currentState = signInCtl.formkey.currentState;
+                            if (currentState!.validate()) {
+                              signInCtl.handleSignIn(loginType: "normal");
+                            }
+                          },
+                        ),
+
+                        ///谷歌登录
+                        FormHelper.submitUIButton(
+                          context,
+                          title: "Google登錄",
+                          icon: ColorFiltered(
+                            colorFilter: const ColorFilter.mode(
+                                Colors.white, BlendMode.modulate),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(28),
+                              clipBehavior: Clip.antiAlias,
+                              child: const Image(
+                                image: AssetImage("assets/google.png"),
+                                height: 30.0,
+                                width: 30.0,
+                              ),
+                            ),
+                          ),
+                          color: const Color.fromARGB(66, 18, 7, 170),
+                          onTap: () async {
+                            signInCtl.handleSignIn(loginType: "google");
+                          },
+                        ),
+
+                        ///脸书登录
+                        FormHelper.submitUIButton(
+                          context,
+                          title: "Facebook登錄",
+                          icon: ColorFiltered(
+                            colorFilter: const ColorFilter.mode(
+                                Colors.white, BlendMode.srcIn),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(28),
+                              clipBehavior: Clip.antiAlias,
+                              child: const Image(
+                                image: AssetImage("assets/facebook.png"),
+                                height: 30.0,
+                                width: 30.0,
+                              ),
+                            ),
+                          ),
+                          color: const Color.fromARGB(255, 52, 6, 138),
+                          onTap: () async {
+                            signInCtl.handleSignIn(loginType: "facebook");
+                          },
+                        ),
+
+                        ///IOS Apple ID登录
+
+                        FormHelper.submitUIButton(
+                          context,
+                          title: "Apple登錄",
+                          icon: ColorFiltered(
+                            colorFilter: const ColorFilter.mode(
+                                Colors.white, BlendMode.srcIn),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(28),
+                              clipBehavior: Clip.hardEdge,
+                              child: const Image(
+                                image: AssetImage("assets/apple.png"),
+                                height: 30.0,
+                                width: 30.0,
+                              ),
+                            ),
+                          ),
+                          color: Colors.black87,
+                          onTap: () async {
+                            signInCtl.handleSignIn(loginType: "apple");
+                          },
+                        ),
+
+                        FormHelper.submitUIButton(
+                          context,
+                          title: "Twitter登錄",
+                          icon: ColorFiltered(
+                            colorFilter: const ColorFilter.mode(
+                                Colors.white, BlendMode.srcIn),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(28),
+                              clipBehavior: Clip.hardEdge,
+                              child: const Image(
+                                image: AssetImage("assets/twitter.png"),
+                                height: 30.0,
+                                width: 30.0,
+                              ),
+                            ),
+                          ),
+                          color: const Color(0xFF00aced),
+                          onTap: () async {
+                            signInCtl.handleSignIn(loginType: "twitter");
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+```
