@@ -1,10 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:spiritualliving/common/utils/storage_manage.dart';
-import 'package:webview_cookie_manager/webview_cookie_manager.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../common/config.dart';
 
@@ -14,19 +13,19 @@ class WebController extends GetxController with GetTickerProviderStateMixin {
   RxBool showToTopBtn = false.obs;
   RxBool isloading = true.obs;
   final StorageManage storageManage = StorageManage();
-  final cookieManager = WebviewCookieManager();
+  final cookieManager = WebViewCookieManager();
   @override
   void onInit() {
-    setWebCookie();
+    //setWebCookie();
     webViewController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
       ..setUserAgent("flutter app")
       ..setNavigationDelegate(NavigationDelegate(
         onProgress: (int progress) {},
-        onPageStarted: (String url) {
+        onPageStarted: (String url) async {
           isloading.value = true;
-          checkLoginCookie();
+          await setWebCookie();
         },
         onPageFinished: (String url) async {
           isloading.value = false;
@@ -46,37 +45,17 @@ class WebController extends GetxController with GetTickerProviderStateMixin {
   }
 
   ///設置cookie
-  void setWebCookie() async {
+  Future<void> setWebCookie() async {
     var loginJson = storageManage.read(Config.loginInfo);
     Map<String, dynamic> loginData = jsonDecode(loginJson);
     if (loginData["cookieName"] != "" && loginData["cookieValue"] != "") {
-      await cookieManager.setCookies(
-        [
-          Cookie(loginData["cookieName"], loginData["cookieValue"])
-            ..domain = Config.domain
-            ..httpOnly = false
-        ],
-      );
+      await webViewController.runJavaScript(
+          'document.cookie = "${loginData["cookieName"]}=${loginData["cookieValue"]}; path=/"');
     }
   }
 
   ///刪除cookie
-  Future<void> deleteAllCookies() async {
+  deleteAllCookies() async {
     await cookieManager.clearCookies();
-  }
-
-  ///检测登录cookie
-  void checkLoginCookie() async {
-    final allCookie = await cookieManager.getCookies(Config.domain);
-    bool hasCookie = false;
-    for (var element in allCookie) {
-      if (element.name.contains("wordpress_logged_in")) {
-        hasCookie = true;
-        break;
-      }
-    }
-    if (!hasCookie) {
-      setWebCookie();
-    }
   }
 }

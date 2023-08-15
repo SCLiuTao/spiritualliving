@@ -64,8 +64,9 @@ class WebPage extends GetView<WebController> {
               selectedIndex: webCtl.currentIndex.value,
               indicatorColor: Colors.green,
               destinations: tabValues,
-              onDestinationSelected: (index) {
+              onDestinationSelected: (index) async {
                 if (index != webCtl.currentIndex.value) {
+                  await webCtl.setWebCookie();
                   if (index == 0) {
                     webCtl.webViewController
                         .loadRequest(Uri.parse(Config.homeUrl));
