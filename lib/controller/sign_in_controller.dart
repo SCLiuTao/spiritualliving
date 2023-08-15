@@ -162,6 +162,12 @@ class SignInController extends GetxController
         );
       }
     } catch (e) {
+      if (loginType == "google") {
+        googleWithSignOut();
+      }
+      if (loginType == "facebook") {
+        googleWithSignOut();
+      }
       showError("登錄失敗");
     }
   }
