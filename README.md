@@ -831,3 +831,168 @@ class SignIn extends StatelessWidget {
   }
 }
 ```
+
+### php代码
+
+```php
+<?php
+
+error_reporting(0);
+//引入WP加载文件
+require "../wp-load.php";
+header("Content-type:text/html;charset=utf-8");
+//允许跨域
+header('Access-Control-Allow-Origin:*');
+header('Access-Control-Allow-Methods:POST,GET,OPTIONS,DELETE');
+header('Access-Control-Allow-Credentials: true');
+header('Access-Control-Allow-Headers: Content-Type,Content-Length,Accept-Encoding,X-Requested-with, Origin');
+global $wpdb;
+// 检测isActive 在user表中是否存在
+$users_fields = $wpdb->get_results("SHOW FIELDS FROM wp_users;");
+$field_column = array_column($users_fields, "Field");
+if (!in_array("isActive", $field_column)) {
+    $wpdb->query("ALTER table wp_users add column isActive tinyint default 1 COMMENT '1:enable,0:disable';");
+}
+
+$postDate = $_POST;
+$displayName = $postDate["displayName"] ?? "";
+$email = $postDate["email"] ?? "";
+$pwd = $postDate["pwd"] ?? "";
+$loginType = $postDate["loginType"] ?? "";
+$isContinue = $postDate["isContinue"] ?? false;
+$pass = wp_generate_password();
+$user_ID = $postDate["userID"] ?? 0;
+if ($loginType == "delAccount") {
+    $wpdb->query("UPDATE  wp_users set isActive = 0 where ID = $user_ID");
+} else if ($loginType == "normal") {
+    $login_data["user_login"] = $displayName;
+    $login_data["user_password"] = $pwd;
+    $user_verify = wp_signon($login_data, false);
+
+    if (is_wp_error($user_verify)) {//數據庫不存在用戶數據時
+        if ($isContinue) {//前端彈出對話框,用戶選擇繼續註冊
+            if (filter_var($displayName, FILTER_VALIDATE_EMAIL)) {
+                $email = $displayName;
+            }
+            $signUpData = [
+                'user_login'    => $displayName,
+                'user_pass'     => $pwd,
+                'user_nicename' => sanitize_user($displayName, true),
+                'display_name'  => $displayName,
+                'nickname'      => $displayName,
+                'first_name'    => $displayName,
+                'user_email'    => $email,
+                'role'          => get_option('default_role')
+            ];
+            $userID = wp_insert_user($signUpData);
+            if (!is_wp_error($userID)) {
+                echo loginData($userID);
+            } else {
+                $login_data['code'] = 201;
+                $login_data['msg'] = '注册并登录失败';
+                echo json_encode($login_data);
+            }
+        } else {
+            $login_data['code'] = 202;
+            $login_data['msg'] = '用户不存在,是否注册';
+            echo json_encode($login_data);
+            die();
+        }
+    } else {//數據庫存在用戶數據時
+        $isActive = $user_verify->data->isActive;//用戶是否已注銷1使用中，0注銷狀態
+        $userID = $user_verify->ID;
+        if ($isActive == 0) {
+            if (!$isContinue) {
+                $login_data['code'] = 202;
+                $login_data['msg'] = '用户不存在,是否注册';
+                echo json_encode($login_data);
+                die();
+            } else {
+                $wpdb->query("UPDATE  wp_users set isActive = 1 where ID = $userID");
+                echo loginData($userID);
+                die;
+            }
+        } else {
+            echo loginData($userID);
+            die;
+        }
+    }
+
+} else {
+    //检查是否是apple以隐藏电子的形式登录
+    $obj = null;
+    if (stripos($email, "privaterelay.appleid.com") !== false) {
+        $obj = get_user_by("login", $displayName);
+    } else {
+        $obj = get_user_by("email", $email);
+    }
+    $userID = 0;
+    if ($obj) {
+        $userID = $obj->ID;
+    }
+    if ($userID != 0) {//用户存在时
+        //当登录是用第三方一键登录时
+        if ($loginType != "normal") {
+            echo loginData($userID, $email);
+        }
+    } else {//用户不存在时
+        $signUpData = array(
+            'user_login'    => $displayName,
+            'user_pass'     => wp_generate_password(),
+            'user_nicename' => sanitize_user($displayName, true),
+            'display_name'  => $displayName,
+            'nickname'      => $displayName,
+            'first_name'    => $displayName,
+            'user_email'    => $email,
+            'role'          => get_option('default_role')
+        );
+        $userID = wp_insert_user($signUpData);
+        if (!is_wp_error($userID)) {
+            echo loginData($userID);
+        } else {
+            $login_data['code'] = 201;
+            $login_data['msg'] = '注册并登录失败';
+            echo json_encode($login_data);
+        }
+    }
+}
+
+
+/**
+ * @param int $userID
+ * @return string
+ */
+function loginData(int $userID, string $email = ""): string {   //设置登录过期时间
+
+    if ($email != "") {//更新email
+        wp_update_user(["ID" => $userID, "user_email" => $email]);
+    }
+    $expiration = time() + apply_filters('auth_cookie_expiration', 50 * 365 * DAY_IN_SECONDS, $userID, true);
+    //生成登录cookie值
+    $cookieValue = wp_generate_auth_cookie($userID, $expiration, 'logged_in');
+    $login_data['code'] = 200;
+    $login_data['msg'] = '登录成功';
+    $login_data["cookieHash"] = COOKIEHASH;
+    $login_data["cookieValue"] = $cookieValue;
+    $login_data["userID"] = $userID;
+    return json_encode($login_data);
+}
+
+
+//允许中文名注册
+//function allowed_chinese_name($username, $raw_username, $strict)
+//{
+//    $username = wp_strip_all_tags($raw_username);
+//    $username = remove_accents($username);
+//    $username = preg_replace('|%([a-fA-F0-9][a-fA-F0-9])|', '', $username);
+//    $username = preg_replace('/&.+?;/', '', $username);
+//    if ($strict) {
+//        $username = preg_replace('|[^a-z\p{Han}0-9 _.\-@]|iu', '', $username);
+//    }
+//    $username = trim($username);
+//    $username = preg_replace('|\s+|', ' ', $username);
+//    return $username;
+//}
+//
+//add_filter('sanitize_user', 'allowed_chinese_name', 10, 3);
+```
