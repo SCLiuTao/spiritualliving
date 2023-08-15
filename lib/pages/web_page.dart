@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -8,6 +8,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:spiritualliving/common/serivce/api_client.dart';
+import 'package:spiritualliving/common/utils/easy_toast.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../common/config.dart';
@@ -52,6 +53,21 @@ class WebPage extends GetView<WebController> {
             title: Text(tabValues[webCtl.currentIndex.value].label),
             actions: [_buildSetView()],
           ),
+          floatingActionButton: Obx(() => Visibility(
+                visible: webCtl.showToTopBtn.value,
+                child: FloatingActionButton(
+                  onPressed: () {
+                    webCtl.webViewController.scrollTo(0, 0);
+                    webCtl.showToTopBtn.value = false;
+                  },
+                  backgroundColor: Colors.grey[900],
+                  child: const Icon(
+                    Icons.arrow_upward,
+                    color: Colors.white,
+                    size: 35,
+                  ),
+                ),
+              )),
           body: SafeArea(
             child: Container(
               decoration: boxLinear,
@@ -189,13 +205,33 @@ class WebPage extends GetView<WebController> {
   ///webview視圖
   Widget _buildWebview() {
     return CupertinoScrollbar(
-      child: WebViewWidget(
-        controller: controller.webViewController,
-        gestureRecognizers: {
-          Factory<VerticalDragGestureRecognizer>(
-            () => VerticalDragGestureRecognizer(),
-          ),
+      child: Listener(
+        onPointerDown: (PointerDownEvent pointerDownEvent) {
+          webCtl.webViewController.getScrollPosition().then((value) {
+            if (value.dy > 300) {
+              webCtl.showToTopBtn.value = true;
+            } else {
+              webCtl.showToTopBtn.value = false;
+            }
+          });
         },
+        child: WebViewWidget(
+          controller: controller.webViewController,
+          gestureRecognizers: {
+            Factory<VerticalDragGestureRecognizer>(
+                () => VerticalDragGestureRecognizer()
+                  ..onDown = (DragDownDetails dragDownDetails) {
+                    webCtl.webViewController.getScrollPosition().then((value) {
+                      if (value.dy == 0 &&
+                          dragDownDetails.globalPosition.direction < 1) {
+                        showToast("Refreshing...");
+                        webCtl.showToTopBtn.value = false;
+                        webCtl.webViewController.reload();
+                      }
+                    });
+                  }),
+          },
+        ),
       ),
     );
   }

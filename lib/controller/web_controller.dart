@@ -2,9 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:spiritualliving/common/utils/storage_manage.dart';
+
 import 'package:webview_flutter/webview_flutter.dart';
 import '../common/config.dart';
+import '../common/utils/storage_manage.dart';
 
 class WebController extends GetxController with GetTickerProviderStateMixin {
   RxInt currentIndex = 0.obs;
@@ -23,6 +24,7 @@ class WebController extends GetxController with GetTickerProviderStateMixin {
       ..setNavigationDelegate(NavigationDelegate(
         onProgress: (int progress) {},
         onPageStarted: (String url) async {
+          showToTopBtn.value = false;
           isloading.value = true;
           await setWebCookie();
         },
