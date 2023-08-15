@@ -205,16 +205,19 @@ class WebPage extends GetView<WebController> {
   ///webview視圖
   Widget _buildWebview() {
     return CupertinoScrollbar(
-      child: Listener(
-        onPointerDown: (PointerDownEvent pointerDownEvent) {
-          webCtl.webViewController.getScrollPosition().then((value) {
-            if (value.dy > 300) {
-              webCtl.showToTopBtn.value = true;
-            } else {
-              webCtl.showToTopBtn.value = false;
-            }
-          });
+      child: GestureDetector(
+        onVerticalDragUpdate: (DragUpdateDetails details) {
+          log("${details.delta.dy}");
         },
+        // onPointerDown: (PointerDownEvent pointerDownEvent) {
+        //   webCtl.webViewController.getScrollPosition().then((value) {
+        //     if (value.dy > 300) {
+        //       webCtl.showToTopBtn.value = true;
+        //     } else {
+        //       webCtl.showToTopBtn.value = false;
+        //     }
+        //   });
+        // },
         child: WebViewWidget(
           controller: controller.webViewController,
           gestureRecognizers: {
