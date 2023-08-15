@@ -1,55 +1,55 @@
-# 基于flutter+PHP+Getx状态管理的第三方登录
+# 基于 flutter+PHP+Getx 状态管理的第三方登录
 
-谷歌登录、脸书登录、Apple登录
+谷歌登录、脸书登录、Apple 登录
 
 ## 谷歌登录
 
-  1. 终端 flutter pub add google_sign_in
-  2. 登录到 [firebase控制台](https://firebase.google.com/)添加项目 spiritual-living
+1. 终端 flutter pub add google_sign_in
+2. 登录到 [firebase 控制台](https://firebase.google.com/)添加项目 spiritual-living
 
-### 谷歌登录Android配置
+### 谷歌登录 Android 配置
 
-  1. 添加android应用
-  2. 获取android SHA1
-  3. 进入项目目录
-  4. 终端 cd android 运行 ./gradlew signingReport
-        ![sha1](screenshot/sha1.png)
-  5. 下载google-services.json,并移动到项目 andoid->app处
-        ![googleservicejson](screenshot/googleservicejson.png)  
-  6. android->build.gradle添加  classpath 'com.google.gms:google-services:4.3.15' ![gms](screenshot/gms.png)
-  7. android->app->build.gradle添加
-      apply plugin: 'com.google.gms.google-services'  
-      implementation platform('com.google.firebase:firebase-bom:32.2.0')  
-      implementation 'com.google.firebase:firebase-analytics-ktx'
-      ![gradle](screenshot/gradle.png)
-  8. 启动google登录 ![googlesigninmethod](screenshot/googlesigninmethod.png)
-  9. 唤起google登录
+1. 添加 android 应用
+2. 获取 android SHA1
+3. 进入项目目录
+4. 终端 cd android 运行 ./gradlew signingReport
+   ![sha1](screenshot/sha1.png)
+5. 下载 google-services.json,并移动到项目 andoid->app 处
+   ![googleservicejson](screenshot/googleservicejson.png)
+6. android->build.gradle 添加 classpath 'com.google.gms:google-services:4.3.15' ![gms](screenshot/gms.png)
+7. android->app->build.gradle 添加
+   apply plugin: 'com.google.gms.google-services'  
+   implementation platform('com.google.firebase:firebase-bom:32.2.0')  
+   implementation 'com.google.firebase:firebase-analytics-ktx'
+   ![gradle](screenshot/gradle.png)
+8. 启动 google 登录 ![googlesigninmethod](screenshot/googlesigninmethod.png)
+9. 唤起 google 登录
 
-      ```dart
-      Future<UserCredential?> signInWithGoogle() async {
-        final GoogleSignInAccount? googleSignInAccount =
-            await GoogleSignIn().signIn();
-        if (googleSignInAccount == null) {
-          return null;
-        } else {
-          final GoogleSignInAuthentication googleAuth =
-              await googleSignInAccount.authentication;
-          final credential = GoogleAuthProvider.credential(
-            accessToken: googleAuth.accessToken,
-            idToken: googleAuth.idToken,
-          );
-          return await FirebaseAuth.instance.signInWithCredential(credential);
-        }
-      }
-      ```
+   ```dart
+   Future<UserCredential?> signInWithGoogle() async {
+     final GoogleSignInAccount? googleSignInAccount =
+         await GoogleSignIn().signIn();
+     if (googleSignInAccount == null) {
+       return null;
+     } else {
+       final GoogleSignInAuthentication googleAuth =
+           await googleSignInAccount.authentication;
+       final credential = GoogleAuthProvider.credential(
+         accessToken: googleAuth.accessToken,
+         idToken: googleAuth.idToken,
+       );
+       return await FirebaseAuth.instance.signInWithCredential(credential);
+     }
+   }
+   ```
 
-### 谷歌登录IOS配置
+### 谷歌登录 IOS 配置
 
-1. [添加IOS应用](https://console.firebase.google.com/project/spiritual-living-37328/overview?hl=zh-cn)填入应用ID
-2. 下载GoogleService-Info.plist
-3. xcode打开项目右键addrunner添加GoogleService-Info.plist到runner  
-  
-4. 打开info.plist添加(SERVER_CLIENT_ID、REVERSED_CLIENT_ID在GoogleService-Info.plist找到并替换)
+1. [添加 IOS 应用](https://console.firebase.google.com/project/spiritual-living-37328/overview?hl=zh-cn)填入应用 ID
+2. 下载 GoogleService-Info.plist
+3. xcode 打开项目右键 addrunner 添加 GoogleService-Info.plist 到 runner
+
+4. 打开 info.plist 添加(SERVER_CLIENT_ID、REVERSED_CLIENT_ID 在 GoogleService-Info.plist 找到并替换)
 
    ```xml
    <key>SERVER_CLIENT_ID</key>
@@ -65,9 +65,9 @@
         </array>
         </dict>
     </array>
-   ```  
+   ```
 
-### google调用代码
+### google 调用代码
 
 ```dart
 Future<UserCredential?> signInWithGoogle() async {
@@ -87,24 +87,24 @@ Future<UserCredential?> signInWithGoogle() async {
 }
 ```
 
-## Apple ID登录
+## Apple ID 登录
 
-### IOS配置
+### IOS 配置
 
-1. [打开apple开发网并登录](https://idmsa.apple.com/)
-2. 创建应用ID ![appleflag](screenshot/appleflag.png)
+1. [打开 apple 开发网并登录](https://idmsa.apple.com/)
+2. 创建应用 ID ![appleflag](screenshot/appleflag.png)
 3. 选择 Sign In with Apple ![Alt text](screenshot/ios-image-1.png)
-4. 在xcode中打开项目,添加Sign In with App服务![Alt text](ios-screenshot/image.png)
+4. 在 xcode 中打开项目,添加 Sign In with App 服务![Alt text](ios-screenshot/image.png)
 
-### android配置
+### android 配置
 
-1. 创建服务ID![Alt text](screenshot/image.png)
-2. 创建完成后返回服务列表，打开刚创建的服务ID,勾选Sign In with Apple,并配置Primary App ID![Alt text](screenshot/image-1.png)
-3. 打开firebase应用，启用apple填入相关信息（密码id为key id,p密钥为右边下载的.p8内容）![Alt text](screenshot/image-2.png)  ![Alt text](screenshot/image-3.png)
+1. 创建服务 ID![Alt text](screenshot/image.png)
+2. 创建完成后返回服务列表，打开刚创建的服务 ID,勾选 Sign In with Apple,并配置 Primary App ID![Alt text](screenshot/image-1.png)
+3. 打开 firebase 应用，启用 apple 填入相关信息（密码 id 为 key id,p 密钥为右边下载的.p8 内容）![Alt text](screenshot/image-2.png) ![Alt text](screenshot/image-3.png)
 4. 复制授权回调网址![Alt text](screenshot/image-4.png)
-5. 填入apple开发网上刚建立的services id的重新定向Return URLs处![Alt text](screenshot/image-5.png)
+5. 填入 apple 开发网上刚建立的 services id 的重新定向 Return URLs 处![Alt text](screenshot/image-5.png)
 
-### apple调用代码
+### apple 调用代码
 
 ```dart
 Future<UserCredential?> signInWithApple() async {
@@ -117,11 +117,11 @@ Future<UserCredential?> signInWithApple() async {
 }
 ```
 
-## facebook登录
+## facebook 登录
 
-### facebook登录android配置
+### facebook 登录 android 配置
 
-1. android/app/build.gradle minSdkVersion修改为22
+1. android/app/build.gradle minSdkVersion 修改为 22
 
    ```xml
     defaultConfig {
@@ -134,43 +134,44 @@ Future<UserCredential?> signInWithApple() async {
              versionCode flutterVersionCode.toInteger()
              versionName flutterVersionName
          }
-    ```
+   ```
 
-2. [创建facebook应用](https://developers.facebook.com/apps/)
-3. 填入网络、隐私  ![Alt text](screenshot/facebookset.png)
-  
-4. [选择或建立android应用程式](https://developers.facebook.com/docs/facebook-login/android)  
+2. [创建 facebook 应用](https://developers.facebook.com/apps/)
+3. 填入网络、隐私 ![Alt text](screenshot/facebookset.png)
+
+4. [选择或建立 android 应用程式](https://developers.facebook.com/docs/facebook-login/android)  
    ![Alt text](screenshot/facebookadroid.png)
 5. 项目 > addroid > build.gradle (Module: app)添加  
    implementation 'com.facebook.android:facebook-login:latest.release'
 
-    ```gradle
-    dependencies {
-     implementation platform('com.google.firebase:firebase-bom:32.2.0')
-     implementation 'com.google.firebase:firebase-analytics-ktx'
-     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-     implementation 'com.facebook.android:facebook-login:latest.release'
-    }
-    ``````
+   ```gradle
+   dependencies {
+    implementation platform('com.google.firebase:firebase-bom:32.2.0')
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.facebook.android:facebook-login:latest.release'
+   }
+   ```
 
-6. /android/app/src/main/res/values/新建strings.xml  
-    例如，如果您的應用程式編號為 1234，而用戶端憑證為 56789，則程式碼如下所示：
+6. /android/app/src/main/res/values/新建 strings.xml  
+   例如，如果您的應用程式編號為 1234，而用戶端憑證為 56789，則程式碼如下所示：
 
-    ```xml
-     <?xml version="1.0" encoding="utf-8"?>
-     <resources>
-         <string name="app_name">Spiritual Living</string>
-         <string name="facebook_app_id">1234</string>
-         <string name="fb_login_protocol_scheme">fb1234</string>
-         <string name="facebook_client_token">6789</string>
-     </resources>
-    ``````
+   ```xml
+    <?xml version="1.0" encoding="utf-8"?>
+    <resources>
+        <string name="app_name">Spiritual Living</string>
+        <string name="facebook_app_id">1234</string>
+        <string name="fb_login_protocol_scheme">fb1234</string>
+        <string name="facebook_client_token">6789</string>
+    </resources>
+   ```
 
-7. 打开文件/android/app/src/main/AndroidManifest.xml  
+7. 打开文件/android/app/src/main/AndroidManifest.xml
+
    1. 添加网络权限
 
       ```xml
-      <uses-permission android:name="android.permission.INTERNET"/>
+      <uses-permission android:name="android.permission.INTERNET" />
       ```
 
    2. 在 application 元素中，为 Facebook 添加活动，并为 Chrome 自定义选项卡添加活动和意图筛选条件
@@ -196,79 +197,81 @@ Future<UserCredential?> signInWithApple() async {
       ```xml
       <queries>
         <package android:name="com.facebook.katana" />
-        <provider android:authorities="com.facebook.katana.provider.PlatformProvider" />
+        <provider
+          android:authorities="com.facebook.katana.provider.PlatformProvider"
+        />
       </queries>
       ```
 
 8. 将包名称和默认类与应用关联并保存![Alt text](screenshot/relevancypackages.png)
 9. 生成发布密钥散列
    1. [网址生成](https://emn178.github.io/online-tools/base64_encode.html)：
-      1. 终端 cd android 运行 ./gradlew signingReport并复制sha1
-      2. key要去除冒号并选择hex生成  
-   2. openssl生成：
-      1. [下载对应系统版本的openssl](https://code.google.com/archive/p/openssl-for-windows/downloads)
-      2. cmd执行 keytool -exportcert -alias sign -keystore "E:\Project\FlutterProject\spiritualliving\android\app\key\sign.jks" | openssl sha1 -binary | openssl base64
-10. firebase启动facebook验证![Alt text](screenshot/allMethod.png)  
+      1. 终端 cd android 运行 ./gradlew signingReport 并复制 sha1
+      2. key 要去除冒号并选择 hex 生成
+   2. openssl 生成：
+      1. [下载对应系统版本的 openssl](https://code.google.com/archive/p/openssl-for-windows/downloads)
+      2. cmd 执行 keytool -exportcert -alias sign -keystore "E:\Project\FlutterProject\spiritualliving\android\app\key\sign.jks" | openssl sha1 -binary | openssl base64
+10. firebase 启动 facebook 验证![Alt text](screenshot/allMethod.png)
 
-### facebook登录IOS配置
+### facebook 登录 IOS 配置
 
-  1. 打开podfile 修改platform :ios, '12.0'
-  2. 使用Facebook注册和配置您的应用程序，添加您的Bundle Identifier![Alt text](screenshot/addFacebookID.png)
-  3. 打开info.plist添加如下(facebook与google例子)
+1. 打开 podfile 修改 platform :ios, '12.0'
+2. 使用 Facebook 注册和配置您的应用程序，添加您的 Bundle Identifier![Alt text](screenshot/addFacebookID.png)
+3. 打开 info.plist 添加如下(facebook 与 google 例子)
 
-        ```xml
-        <key>CFBundleURLTypes</key>
-        <array>
-          <dict>
-            <key>CFBundleTypeRole</key>
-            <string>Editor</string>
-            <key>CFBundleURLSchemes</key>
-            <array>
-              <string>fb{your-app-id}</string>
-              <string>com.googleusercontent.apps.{your-app-specific-url}</string>
-            </array>
-          </dict>
-        </array>
-        <key>FacebookAppID</key>
-        <string>{your-app-id}</string>
-        <key>FacebookClientToken</key>
-        <string>CLIENT-TOKEN</string>
-        <key>FacebookDisplayName</key>
-        <string>{your-app-name}</string>
-        <key>LSApplicationQueriesSchemes</key>
-        <array>
-          <string>fbapi</string>
-          <string>fb-messenger-share-api</string>
-        </array>
-        ```
+   ```xml
+   <key>CFBundleURLTypes</key>
+   <array>
+     <dict>
+       <key>CFBundleTypeRole</key>
+       <string>Editor</string>
+       <key>CFBundleURLSchemes</key>
+       <array>
+         <string>fb{your-app-id}</string>
+         <string>com.googleusercontent.apps.{your-app-specific-url}</string>
+       </array>
+     </dict>
+   </array>
+   <key>FacebookAppID</key>
+   <string>{your-app-id}</string>
+   <key>FacebookClientToken</key>
+   <string>CLIENT-TOKEN</string>
+   <key>FacebookDisplayName</key>
+   <string>{your-app-name}</string>
+   <key>LSApplicationQueriesSchemes</key>
+   <array>
+     <string>fbapi</string>
+     <string>fb-messenger-share-api</string>
+   </array>
+   ```
 
-### facebook调用代码
+### facebook 调用代码
 
- ```dart
- Future<UserCredential?> signInWithFacebook() async {
-    final LoginResult loginResult = await FacebookAuth.instance.login();
-    if (loginResult.status == LoginStatus.cancelled) {
-      showError("用戶取消登錄");
-      return null;
-    } else if (loginResult.status == LoginStatus.failed) {
-      showError("驗證失敗");
-      return null;
-    } else {
-      final OAuthCredential facebookAuthCredential =
-          FacebookAuthProvider.credential(loginResult.accessToken!.token);
-      return FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
-    }
-  }
- ```
+```dart
+Future<UserCredential?> signInWithFacebook() async {
+   final LoginResult loginResult = await FacebookAuth.instance.login();
+   if (loginResult.status == LoginStatus.cancelled) {
+     showError("用戶取消登錄");
+     return null;
+   } else if (loginResult.status == LoginStatus.failed) {
+     showError("驗證失敗");
+     return null;
+   } else {
+     final OAuthCredential facebookAuthCredential =
+         FacebookAuthProvider.credential(loginResult.accessToken!.token);
+     return FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
+   }
+ }
+```
 
-## Twitter登录
+## Twitter 登录
 
-1. [前往twitter开发网创建应用](https://developer.twitter.com/apps)
-2. 对应用设置User authentication settings ![Alt text](screenshot/twitterset.png)
- ***一定要开启用email权限，否则获取不到emial***
-3. [firebase](https://console.firebase.google.com/)内Authentication->sign in method 开启twitter,并填写twitter应用key和密钥![twitterkey](screenshot/twitterkey.png)
-4. 复制回调网址，并填写到twitter应用内的Callback URI![twittercalluri](screenshot/twittercalluri.png)
-5. IOS内打开target->info->URL Schemes，并填写编码的应用 ID,编码的应用 ID在firebase ios应用下可找到![twitterencode](screenshot/twitterencode.png)
+1. [前往 twitter 开发网创建应用](https://developer.twitter.com/apps)
+2. 对应用设置 User authentication settings ![Alt text](screenshot/twitterset.png)
+   **_一定要开启用 email 权限，否则获取不到 emial_**
+3. [firebase](https://console.firebase.google.com/)内 Authentication->sign in method 开启 twitter,并填写 twitter 应用 key 和密钥![twitterkey](screenshot/twitterkey.png)
+4. 复制回调网址，并填写到 twitter 应用内的 Callback URI![twittercalluri](screenshot/twittercalluri.png)
+5. IOS 内打开 target->info->URL Schemes，并填写编码的应用 ID,编码的应用 ID 在 firebase ios 应用下可找到![twitterencode](screenshot/twitterencode.png)
 
 ### 调用代码
 
@@ -832,152 +835,168 @@ class SignIn extends StatelessWidget {
 }
 ```
 
-### php代码
+### php 代码
 
 ```php
 <?php
 
 error_reporting(0);
 //引入WP加载文件
-require "../wp-load.php";
-header("Content-type:text/html;charset=utf-8");
+require '../wp-load.php';
+header('Content-type:text/html;charset=utf-8');
 //允许跨域
 header('Access-Control-Allow-Origin:*');
 header('Access-Control-Allow-Methods:POST,GET,OPTIONS,DELETE');
 header('Access-Control-Allow-Credentials: true');
-header('Access-Control-Allow-Headers: Content-Type,Content-Length,Accept-Encoding,X-Requested-with, Origin');
+header(
+  'Access-Control-Allow-Headers: Content-Type,Content-Length,Accept-Encoding,X-Requested-with, Origin'
+);
 global $wpdb;
 // 检测isActive 在user表中是否存在
-$users_fields = $wpdb->get_results("SHOW FIELDS FROM wp_users;");
-$field_column = array_column($users_fields, "Field");
-if (!in_array("isActive", $field_column)) {
-    $wpdb->query("ALTER table wp_users add column isActive tinyint default 1 COMMENT '1:enable,0:disable';");
+$users_fields = $wpdb->get_results('SHOW FIELDS FROM wp_users;');
+$field_column = array_column($users_fields, 'Field');
+if (!in_array('isActive', $field_column)) {
+  $wpdb->query(
+    "ALTER table wp_users add column isActive tinyint default 1 COMMENT '1:enable,0:disable';"
+  );
 }
 
 $postDate = $_POST;
-$displayName = $postDate["displayName"] ?? "";
-$email = $postDate["email"] ?? "";
-$pwd = $postDate["pwd"] ?? "";
-$loginType = $postDate["loginType"] ?? "";
-$isContinue = $postDate["isContinue"] ?? false;
+$displayName = $postDate['displayName'] ?? '';
+$email = $postDate['email'] ?? '';
+$pwd = $postDate['pwd'] ?? '';
+$loginType = $postDate['loginType'] ?? '';
+$isContinue = $postDate['isContinue'] ?? false;
 $pass = wp_generate_password();
-$user_ID = $postDate["userID"] ?? 0;
-if ($loginType == "delAccount") {
-    $wpdb->query("UPDATE  wp_users set isActive = 0 where ID = $user_ID");
-} else if ($loginType == "normal") {
-    $login_data["user_login"] = $displayName;
-    $login_data["user_password"] = $pwd;
-    $user_verify = wp_signon($login_data, false);
+$user_ID = $postDate['userID'] ?? 0;
+if ($loginType == 'delAccount') {
+  $wpdb->query("UPDATE  wp_users set isActive = 0 where ID = $user_ID");
+} elseif ($loginType == 'normal') {
+  $login_data['user_login'] = $displayName;
+  $login_data['user_password'] = $pwd;
+  $user_verify = wp_signon($login_data, false);
 
-    if (is_wp_error($user_verify)) {//數據庫不存在用戶數據時
-        if ($isContinue) {//前端彈出對話框,用戶選擇繼續註冊
-            if (filter_var($displayName, FILTER_VALIDATE_EMAIL)) {
-                $email = $displayName;
-            }
-            $signUpData = [
-                'user_login'    => $displayName,
-                'user_pass'     => $pwd,
-                'user_nicename' => sanitize_user($displayName, true),
-                'display_name'  => $displayName,
-                'nickname'      => $displayName,
-                'first_name'    => $displayName,
-                'user_email'    => $email,
-                'role'          => get_option('default_role')
-            ];
-            $userID = wp_insert_user($signUpData);
-            if (!is_wp_error($userID)) {
-                echo loginData($userID);
-            } else {
-                $login_data['code'] = 201;
-                $login_data['msg'] = '注册并登录失败';
-                echo json_encode($login_data);
-            }
-        } else {
-            $login_data['code'] = 202;
-            $login_data['msg'] = '用户不存在,是否注册';
-            echo json_encode($login_data);
-            die();
-        }
-    } else {//數據庫存在用戶數據時
-        $isActive = $user_verify->data->isActive;//用戶是否已注銷1使用中，0注銷狀態
-        $userID = $user_verify->ID;
-        if ($isActive == 0) {
-            if (!$isContinue) {
-                $login_data['code'] = 202;
-                $login_data['msg'] = '用户不存在,是否注册';
-                echo json_encode($login_data);
-                die();
-            } else {
-                $wpdb->query("UPDATE  wp_users set isActive = 1 where ID = $userID");
-                echo loginData($userID);
-                die;
-            }
-        } else {
-            echo loginData($userID);
-            die;
-        }
-    }
-
-} else {
-    //检查是否是apple以隐藏电子的形式登录
-    $obj = null;
-    if (stripos($email, "privaterelay.appleid.com") !== false) {
-        $obj = get_user_by("login", $displayName);
+  if (is_wp_error($user_verify)) {
+    //數據庫不存在用戶數據時
+    if ($isContinue) {
+      //前端彈出對話框,用戶選擇繼續註冊
+      if (filter_var($displayName, FILTER_VALIDATE_EMAIL)) {
+        $email = $displayName;
+      }
+      $signUpData = [
+        'user_login' => $displayName,
+        'user_pass' => $pwd,
+        'user_nicename' => sanitize_user($displayName, true),
+        'display_name' => $displayName,
+        'nickname' => $displayName,
+        'first_name' => $displayName,
+        'user_email' => $email,
+        'role' => get_option('default_role'),
+      ];
+      $userID = wp_insert_user($signUpData);
+      if (!is_wp_error($userID)) {
+        echo loginData($userID);
+      } else {
+        $login_data['code'] = 201;
+        $login_data['msg'] = '注册并登录失败';
+        echo json_encode($login_data);
+      }
     } else {
-        $obj = get_user_by("email", $email);
+      $login_data['code'] = 202;
+      $login_data['msg'] = '用户不存在,是否注册';
+      echo json_encode($login_data);
+      die();
     }
-    $userID = 0;
-    if ($obj) {
-        $userID = $obj->ID;
+  } else {
+    //數據庫存在用戶數據時
+    $isActive = $user_verify->data->isActive; //用戶是否已注銷1使用中，0注銷狀態
+    $userID = $user_verify->ID;
+    if ($isActive == 0) {
+      if (!$isContinue) {
+        $login_data['code'] = 202;
+        $login_data['msg'] = '用户不存在,是否注册';
+        echo json_encode($login_data);
+        die();
+      } else {
+        $wpdb->query("UPDATE  wp_users set isActive = 1 where ID = $userID");
+        echo loginData($userID);
+        die();
+      }
+    } else {
+      echo loginData($userID);
+      die();
     }
-    if ($userID != 0) {//用户存在时
-        //当登录是用第三方一键登录时
-        if ($loginType != "normal") {
-            echo loginData($userID, $email);
-        }
-    } else {//用户不存在时
-        $signUpData = array(
-            'user_login'    => $displayName,
-            'user_pass'     => wp_generate_password(),
-            'user_nicename' => sanitize_user($displayName, true),
-            'display_name'  => $displayName,
-            'nickname'      => $displayName,
-            'first_name'    => $displayName,
-            'user_email'    => $email,
-            'role'          => get_option('default_role')
-        );
-        $userID = wp_insert_user($signUpData);
-        if (!is_wp_error($userID)) {
-            echo loginData($userID);
-        } else {
-            $login_data['code'] = 201;
-            $login_data['msg'] = '注册并登录失败';
-            echo json_encode($login_data);
-        }
+  }
+} else {
+  //检查是否是apple以隐藏电子的形式登录
+  $obj = null;
+  if (stripos($email, 'privaterelay.appleid.com') !== false) {
+    $obj = get_user_by('login', $displayName);
+  } else {
+    $obj = get_user_by('email', $email);
+  }
+  $userID = 0;
+  if ($obj) {
+    $userID = $obj->ID;
+  }
+  if ($userID != 0) {
+    //用户存在时
+    //当登录是用第三方一键登录时
+    if ($loginType != 'normal') {
+      echo loginData($userID, $email);
     }
+  } else {
+    //用户不存在时
+    $signUpData = [
+      'user_login' => $displayName,
+      'user_pass' => wp_generate_password(),
+      'user_nicename' => sanitize_user($displayName, true),
+      'display_name' => $displayName,
+      'nickname' => $displayName,
+      'first_name' => $displayName,
+      'user_email' => $email,
+      'role' => get_option('default_role'),
+    ];
+    $userID = wp_insert_user($signUpData);
+    if (!is_wp_error($userID)) {
+      echo loginData($userID);
+    } else {
+      $login_data['code'] = 201;
+      $login_data['msg'] = '注册并登录失败';
+      echo json_encode($login_data);
+    }
+  }
 }
-
 
 /**
  * @param int $userID
  * @return string
  */
-function loginData(int $userID, string $email = ""): string {   //设置登录过期时间
+function loginData(int $userID, string $email = ''): string
+{
+  //设置登录过期时间
 
-    if ($email != "") {//更新email
-        wp_update_user(["ID" => $userID, "user_email" => $email]);
-    }
-    $expiration = time() + apply_filters('auth_cookie_expiration', 50 * 365 * DAY_IN_SECONDS, $userID, true);
-    //生成登录cookie值
-    $cookieValue = wp_generate_auth_cookie($userID, $expiration, 'logged_in');
-    $login_data['code'] = 200;
-    $login_data['msg'] = '登录成功';
-    $login_data["cookieHash"] = COOKIEHASH;
-    $login_data["cookieValue"] = $cookieValue;
-    $login_data["userID"] = $userID;
-    return json_encode($login_data);
+  if ($email != '') {
+    //更新email
+    wp_update_user(['ID' => $userID, 'user_email' => $email]);
+  }
+  $expiration =
+    time() +
+    apply_filters(
+      'auth_cookie_expiration',
+      50 * 365 * DAY_IN_SECONDS,
+      $userID,
+      true
+    );
+  //生成登录cookie值
+  $cookieValue = wp_generate_auth_cookie($userID, $expiration, 'logged_in');
+  $login_data['code'] = 200;
+  $login_data['msg'] = '登录成功';
+  $login_data['cookieHash'] = COOKIEHASH;
+  $login_data['cookieValue'] = $cookieValue;
+  $login_data['userID'] = $userID;
+  return json_encode($login_data);
 }
-
 
 //允许中文名注册
 //function allowed_chinese_name($username, $raw_username, $strict)
