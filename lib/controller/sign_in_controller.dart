@@ -191,7 +191,7 @@ class SignInController extends GetxController
       if (remoteLoginRet["code"] == 200) {
         saveRemoteInfo(remoteData: remoteLoginRet, loginType: loginType);
 
-        Get.offAndToNamed(Routes.webpage);
+        Get.offAndToNamed(Routes.inAppWeb);
       } else if (remoteLoginRet["code"] == 202) {
         //只有普通註冊時，賬號不存在才返回202
         iosDialog(
