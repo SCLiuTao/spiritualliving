@@ -155,7 +155,6 @@ class InAppWebpage extends StatelessWidget {
         inAppWebCtl.webViewController = controller;
       },
       onLoadStart: (controller, url) {
-        inAppWebCtl.setWebCookie();
         inAppWebCtl.showToTopBtn.value = false;
 
         log("加载完成：$url");
@@ -196,14 +195,12 @@ class InAppWebpage extends StatelessWidget {
       onProgressChanged: (controller, progress) {
         if (progress == 100) {
           inAppWebCtl.pullToRefreshController.endRefreshing();
-        }
-        log("加载进度：${progress / 100}");
-        inAppWebCtl.progress.value = progress / 100;
-        if (progress / 100 == 1.0) {
+          inAppWebCtl.setWebCookie();
           inAppWebCtl.webViewController!.evaluateJavascript(
               source:
                   'document.getElementsByClassName("elementor-widget-heading")[0].style.display="none";');
         }
+        log("加载进度：${progress / 100}");
       },
       onUpdateVisitedHistory: (controller, url, androidIsReload) {},
       onConsoleMessage: (controller, consoleMessage) {},
