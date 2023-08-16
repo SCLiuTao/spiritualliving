@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -205,34 +204,32 @@ class WebPage extends GetView<WebController> {
   ///webview視圖
   Widget _buildWebview() {
     return CupertinoScrollbar(
-      child: GestureDetector(
-        onVerticalDragUpdate: (DragUpdateDetails details) {
-          log("${details.delta.dy}");
+      child: Listener(
+        onPointerDown: (PointerDownEvent pointerDownEvent) {
+          webCtl.webViewController.getScrollPosition().then((value) {
+            if (value.dy > 300) {
+              webCtl.showToTopBtn.value = true;
+            } else {
+              webCtl.showToTopBtn.value = false;
+            }
+          });
         },
-        // onPointerDown: (PointerDownEvent pointerDownEvent) {
-        //   webCtl.webViewController.getScrollPosition().then((value) {
-        //     if (value.dy > 300) {
-        //       webCtl.showToTopBtn.value = true;
-        //     } else {
-        //       webCtl.showToTopBtn.value = false;
-        //     }
-        //   });
-        // },
         child: WebViewWidget(
           controller: controller.webViewController,
           gestureRecognizers: {
             Factory<VerticalDragGestureRecognizer>(
-                () => VerticalDragGestureRecognizer()
-                  ..onDown = (DragDownDetails dragDownDetails) {
-                    webCtl.webViewController.getScrollPosition().then((value) {
-                      if (value.dy == 0 &&
-                          dragDownDetails.globalPosition.direction < 1) {
-                        showToast("Refreshing...");
-                        webCtl.showToTopBtn.value = false;
-                        webCtl.webViewController.reload();
-                      }
-                    });
-                  }),
+              () => VerticalDragGestureRecognizer()
+                ..onDown = (DragDownDetails dragDownDetails) {
+                  webCtl.webViewController.getScrollPosition().then((value) {
+                    if (value.dy == 0 &&
+                        dragDownDetails.globalPosition.direction < 1) {
+                      showToast("Refreshing...");
+                      webCtl.showToTopBtn.value = false;
+                      webCtl.webViewController.reload();
+                    }
+                  });
+                },
+            ),
           },
         ),
       ),

@@ -42,6 +42,7 @@ class WebController extends GetxController with GetTickerProviderStateMixin {
         },
       ))
       ..loadRequest(Uri.parse(Config.baseUrl));
+
     super.onInit();
   }
 
