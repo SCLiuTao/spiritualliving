@@ -94,7 +94,7 @@ Future<UserCredential?> signInWithGoogle() async {
 1. [打开 apple 开发网并登录](https://idmsa.apple.com/)
 2. 创建应用 ID ![appleflag](screenshot/appleflag.png)
 3. 选择 Sign In with Apple ![Alt text](screenshot/ios-image-1.png)
-4. 在 xcode 中打开项目,添加 Sign In with App 服务![Alt text](ios-screenshot/image.png)
+4. 在 xcode 中打开项目,添加 Sign In with App 服务![Alt text](screenshot/ios-image.png)
 
 ### android 配置
 
