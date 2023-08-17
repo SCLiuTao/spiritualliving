@@ -193,6 +193,7 @@ class InAppWebpage extends StatelessWidget {
             });
       },
       onProgressChanged: (controller, progress) {
+        inAppWebCtl.progress.value = progress / 100;
         if (progress == 100) {
           inAppWebCtl.pullToRefreshController.endRefreshing();
           inAppWebCtl.setWebCookie();

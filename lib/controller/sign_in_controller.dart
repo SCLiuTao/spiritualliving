@@ -168,7 +168,7 @@ class SignInController extends GetxController
       if (loginType == "facebook") {
         googleWithSignOut();
       }
-      showError("登錄失敗");
+      showError("授權異常");
     }
   }
 
