@@ -120,7 +120,6 @@ class SignInController extends GetxController
           }
         }
       } else if (loginType == "apple") {
-        signInWithApple();
         User? user = await signInWithApple();
         if (user != null) {
           String? displayName = user.displayName;
