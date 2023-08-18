@@ -129,6 +129,8 @@ class SignInController extends GetxController
             "email": email,
             "loginType": loginType,
           };
+        } else {
+          Get.offAllNamed(Routes.inAppWeb);
         }
       } else if (loginType == "twitter") {
         UserCredential? auth = await signInWithTwitter();
