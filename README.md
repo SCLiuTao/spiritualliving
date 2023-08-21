@@ -107,14 +107,40 @@ Future<UserCredential?> signInWithGoogle() async {
 ### apple 调用代码
 
 ```dart
-Future<UserCredential?> signInWithApple() async {
-  final appleProvider = AppleAuthProvider();
-  if (kIsWeb) {
-    return await FirebaseAuth.instance.signInWithPopup(appleProvider);
-  } else {
-    return await FirebaseAuth.instance.signInWithProvider(appleProvider);
+ Future<User?> signInWithApple() async {
+    try {
+      final appleIdCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName
+        ],
+      );
+
+      final OAuthProvider oAuthProvider = OAuthProvider('apple.com');
+      final credential = oAuthProvider.credential(
+        idToken: appleIdCredential.identityToken,
+        accessToken: appleIdCredential.authorizationCode,
+      );
+      final UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      final User? user = userCredential.user;
+      print('====>用户登录成功：$user');
+      return user;
+    } on SignInWithAppleAuthorizationException catch (e) {
+      if (e.code == AuthorizationErrorCode.canceled) {
+        // 用户取消了 Apple 登录授权操作
+        showError("用戶取消登錄");
+        return null;
+      } else if (e.code == AuthorizationErrorCode.failed) {
+        showError("驗證失敗");
+        return null;
+      }
+    } catch (e) {
+      showError("驗證失敗");
+      return null;
+    }
+    return null;
   }
-}
 ```
 
 ## facebook 登录
@@ -292,6 +318,7 @@ Future<UserCredential> signInWithTwitter() async {
 
 ```dart
 import 'dart:convert';
+import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -299,6 +326,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../common/serivce/api_client.dart';
 import '../common/config.dart';
 import '../common/utils/easy_toast.dart';
@@ -339,18 +367,6 @@ class SignInController extends GetxController
     super.onClose();
   }
 
-  ///判断登录信息是否存在，且在登录状态时直接进入webview
-
-  void checkLogin() {
-    var loginInfo = storageManage.read(Config.loginInfo);
-    if (loginInfo != null) {
-      Map loginInfoMap = jsonDecode(loginInfo);
-      if (loginInfoMap["islogin"]) {
-        Get.offAndToNamed(Routes.webpage);
-      }
-    }
-  }
-
   ///普通登錄
   Future<void> normalLogin() async {
     Map<String, dynamic>? loginData;
@@ -374,7 +390,6 @@ class SignInController extends GetxController
 
   Future<void> handleSignIn({required String loginType}) async {
     Map<String, dynamic>? loginData;
-
     try {
       if (loginType == "google") {
         UserCredential? auth = await signInWithGoogle();
@@ -411,19 +426,15 @@ class SignInController extends GetxController
           }
         }
       } else if (loginType == "apple") {
-        UserCredential? auth = await signInWithApple();
-
-        if (auth != null) {
-          User? user = auth.user;
-          if (user != null) {
-            String? displayName = user.displayName;
-            String? email = user.email;
-            loginData = {
-              "displayName": displayName,
-              "email": email,
-              "loginType": loginType,
-            };
-          }
+        User? user = await signInWithApple();
+        if (user != null) {
+          String? displayName = user.displayName;
+          String? email = user.email;
+          loginData = {
+            "displayName": displayName,
+            "email": email,
+            "loginType": loginType,
+          };
         }
       } else if (loginType == "twitter") {
         UserCredential? auth = await signInWithTwitter();
@@ -448,6 +459,7 @@ class SignInController extends GetxController
         };
       }
       if (loginData != null) {
+        print("====>$loginData");
         //执行远程登录
         remoteLogin(
           data: loginData,
@@ -461,7 +473,7 @@ class SignInController extends GetxController
       if (loginType == "facebook") {
         googleWithSignOut();
       }
-      showError("登錄失敗");
+      showError("授權異常");
     }
   }
 
@@ -476,6 +488,7 @@ class SignInController extends GetxController
 
     ApiClient apiClient = ApiClient();
     var ret = await apiClient.post(path: Config.loginUrl, data: data);
+    print("====>$ret");
     if (EasyLoading.isShow) {
       EasyLoading.dismiss();
     }
@@ -484,7 +497,7 @@ class SignInController extends GetxController
       if (remoteLoginRet["code"] == 200) {
         saveRemoteInfo(remoteData: remoteLoginRet, loginType: loginType);
 
-        Get.offAndToNamed(Routes.webpage);
+        Get.offAndToNamed(Routes.inAppWeb);
       } else if (remoteLoginRet["code"] == 202) {
         //只有普通註冊時，賬號不存在才返回202
         iosDialog(
@@ -582,13 +595,47 @@ class SignInController extends GetxController
   }
 
   /// apple登錄
-  Future<UserCredential?> signInWithApple() async {
-    final appleProvider = AppleAuthProvider();
-    if (kIsWeb) {
-      return await FirebaseAuth.instance.signInWithPopup(appleProvider);
-    } else {
-      return await FirebaseAuth.instance.signInWithProvider(appleProvider);
+  // Future<UserCredential?> signInWithApple() async {
+  //   final appleProvider = AppleAuthProvider();
+  //   if (kIsWeb) {
+  //     return await FirebaseAuth.instance.signInWithPopup(appleProvider);
+  //   } else {
+  //     return await FirebaseAuth.instance.signInWithProvider(appleProvider);
+  //   }
+  // }
+  Future<User?> signInWithApple() async {
+    try {
+      final appleIdCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName
+        ],
+      );
+
+      final OAuthProvider oAuthProvider = OAuthProvider('apple.com');
+      final credential = oAuthProvider.credential(
+        idToken: appleIdCredential.identityToken,
+        accessToken: appleIdCredential.authorizationCode,
+      );
+      final UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      final User? user = userCredential.user;
+      print('====>用户登录成功：$user');
+      return user;
+    } on SignInWithAppleAuthorizationException catch (e) {
+      if (e.code == AuthorizationErrorCode.canceled) {
+        // 用户取消了 Apple 登录授权操作
+        showError("用戶取消登錄");
+        return null;
+      } else if (e.code == AuthorizationErrorCode.failed) {
+        showError("驗證失敗");
+        return null;
+      }
+    } catch (e) {
+      showError("驗證失敗");
+      return null;
     }
+    return null;
   }
 
   ///退出google登录
@@ -610,7 +657,18 @@ class SignInController extends GetxController
       return;
     }
   }
+
+  ///生成随机字条串
+  String randomString(int length) {
+    const String chars =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+    final Random rnd = Random();
+    return String.fromCharCodes(Iterable.generate(
+            length, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))))
+        .toLowerCase();
+  }
 }
+
 ```
 
 ### dart UI

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -47,18 +46,6 @@ class SignInController extends GetxController
   void onClose() {
     animationController.dispose();
     super.onClose();
-  }
-
-  ///判断登录信息是否存在，且在登录状态时直接进入webview
-
-  void checkLogin() {
-    var loginInfo = storageManage.read(Config.loginInfo);
-    if (loginInfo != null) {
-      Map loginInfoMap = jsonDecode(loginInfo);
-      if (loginInfoMap["islogin"]) {
-        Get.offAndToNamed(Routes.webpage);
-      }
-    }
   }
 
   ///普通登錄
@@ -129,8 +116,6 @@ class SignInController extends GetxController
             "email": email,
             "loginType": loginType,
           };
-        } else {
-          Get.offAllNamed(Routes.inAppWeb);
         }
       } else if (loginType == "twitter") {
         UserCredential? auth = await signInWithTwitter();
@@ -155,6 +140,7 @@ class SignInController extends GetxController
         };
       }
       if (loginData != null) {
+        print("====>$loginData");
         //执行远程登录
         remoteLogin(
           data: loginData,
@@ -183,6 +169,7 @@ class SignInController extends GetxController
 
     ApiClient apiClient = ApiClient();
     var ret = await apiClient.post(path: Config.loginUrl, data: data);
+    print("====>$ret");
     if (EasyLoading.isShow) {
       EasyLoading.dismiss();
     }
@@ -305,6 +292,7 @@ class SignInController extends GetxController
           AppleIDAuthorizationScopes.fullName
         ],
       );
+
       final OAuthProvider oAuthProvider = OAuthProvider('apple.com');
       final credential = oAuthProvider.credential(
         idToken: appleIdCredential.identityToken,
@@ -313,7 +301,7 @@ class SignInController extends GetxController
       final UserCredential userCredential =
           await FirebaseAuth.instance.signInWithCredential(credential);
       final User? user = userCredential.user;
-      //print('====>用户登录成功：${user}');
+      print('====>用户登录成功：$user');
       return user;
     } on SignInWithAppleAuthorizationException catch (e) {
       if (e.code == AuthorizationErrorCode.canceled) {

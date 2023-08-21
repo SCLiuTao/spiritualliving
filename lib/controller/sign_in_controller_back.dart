@@ -50,26 +50,27 @@ class SignInController2 extends GetxController
 
   ///google登录
   Future<void> loginWithGoogle() async {
-    String? googleLoginInfo = storageManage.read(Config.googleLoginData);
+    //String? googleLoginInfo = storageManage.read(Config.googleLoginData);
     Map<String, dynamic>? loginData;
     //调用google登录
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleLoginInfo == null) {
-        if (googleUser != null) {
-          String? firstName = googleUser.displayName;
-          String? email = googleUser.email;
-          loginData = {
-            "firstName": firstName,
-            "email": email,
-            "loginType": "google",
-          };
-          storageManage.save(Config.googleLoginData, jsonEncode(loginData));
-        }
-      } else {
-        //用户信息存在直接远程登录
-        loginData = jsonDecode(googleLoginInfo);
+      //if (googleLoginInfo == null) {
+      if (googleUser != null) {
+        String? firstName = googleUser.displayName;
+        String? email = googleUser.email;
+        loginData = {
+          "firstName": firstName,
+          "email": email,
+          "loginType": "google",
+        };
+        //storageManage.save(Config.googleLoginData, jsonEncode(loginData));
+        //}
       }
+      // else {
+      //   //用户信息存在直接远程登录
+      //   loginData = jsonDecode(googleLoginInfo);
+      // }
       if (loginData != null) {
         //执行远程登录
         remoteLogin(
@@ -88,7 +89,7 @@ class SignInController2 extends GetxController
   Future<void> loginWithApple() async {
     if (await SignInWithApple.isAvailable()) {
       try {
-        String? appleLoginInfo = storageManage.read(Config.appleLoginData);
+        //String? appleLoginInfo = storageManage.read(Config.appleLoginData);
         Map<String, dynamic>? loginData;
         final credential = await SignInWithApple.getAppleIDCredential(
           scopes: [
@@ -97,24 +98,25 @@ class SignInController2 extends GetxController
           ],
         );
         print(credential);
-        if (appleLoginInfo == null) {
-          final String? givenName = credential.givenName;
-          final String? familyName = credential.familyName;
-          final String? email = credential.email;
-          final String firstName = givenName! + familyName!;
+        //if (appleLoginInfo == null) {
+        final String? givenName = credential.givenName;
+        final String? familyName = credential.familyName;
+        final String? email = credential.email;
+        final String firstName = givenName! + familyName!;
 
-          if (firstName.isNotEmpty || email!.isNotEmpty) {
-            loginData = {
-              "firstName": firstName,
-              "email": email,
-              "loginType": "apple",
-            };
-            storageManage.save(Config.appleLoginData, jsonEncode(loginData));
-          }
-        } else {
-          //用户信息存在直接远程登录
-          loginData = jsonDecode(appleLoginInfo);
+        if (firstName.isNotEmpty || email!.isNotEmpty) {
+          loginData = {
+            "firstName": firstName,
+            "email": email,
+            "loginType": "apple",
+          };
+          // storageManage.save(Config.appleLoginData, jsonEncode(loginData));
         }
+        //}
+        // else {
+        //   //用户信息存在直接远程登录
+        //   loginData = jsonDecode(appleLoginInfo);
+        // }
         if (loginData != null) {
           //print("====>$loginData");
           //执行远程登录

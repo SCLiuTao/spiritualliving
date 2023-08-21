@@ -55,7 +55,9 @@ class InAppWebpage extends StatelessWidget {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Obx(() => Text(tabValues[inAppWebCtl.currentIndex.value].label)),
-        actions: [_buildSetView()],
+        actions: [
+          Obx(() => inAppWebCtl.logged.value ? _buildSetView() : Container())
+        ],
       ),
       floatingActionButton: Obx(
         () => Visibility(
@@ -126,19 +128,27 @@ class InAppWebpage extends StatelessWidget {
         ];
       },
       onSelected: (value) async {
+        inAppWebCtl.logged.value = false;
         final StorageManage storageManage = StorageManage();
-        var loginInfo = jsonDecode(storageManage.read(Config.loginInfo));
-        inAppWebCtl.clearCookies();
-        loginInfo['islogin'] = false;
-        storageManage.save(Config.loginInfo, jsonEncode(loginInfo));
-
-        if (value == "delAccount") {
-          final ApiClient apiClient = ApiClient();
-          apiClient.post(
-              path: Config.loginUrl,
-              data: {"loginType": "delAccount", "userID": loginInfo["userID"]});
+        final String? loginInfoJson = storageManage.read(Config.loginInfo);
+        if (loginInfoJson != null) {
+          var loginInfo = jsonDecode(loginInfoJson);
+          loginInfo['islogin'] = false;
+          storageManage.save(Config.loginInfo, jsonEncode(loginInfo));
+          if (value == "delAccount") {
+            final ApiClient apiClient = ApiClient();
+            apiClient.post(path: Config.loginUrl, data: {
+              "loginType": "delAccount",
+              "userID": loginInfo["userID"]
+            });
+          }
         }
-        Get.offNamed(Routes.signin);
+        log("${jsonDecode(storageManage.read(Config.loginInfo))}");
+        inAppWebCtl.clearCookies().then((value) {
+          inAppWebCtl.currentIndex.value = 0;
+          inAppWebCtl.webViewController!
+              .loadUrl(urlRequest: URLRequest(url: Uri.parse(Config.homeUrl)));
+        });
       },
     );
   }
@@ -166,10 +176,17 @@ class InAppWebpage extends StatelessWidget {
       },
       shouldOverrideUrlLoading: (controller, navigationAction) async {
         var uri = navigationAction.request.url!;
-        log("当前url:$uri");
         if (uri.path.contains("logout")) {
           Get.offAndToNamed(Routes.signin);
           return NavigationActionPolicy.CANCEL;
+        }
+        if (uri.path.contains("my-account")) {
+          bool ret = await inAppWebCtl.getCookies();
+          log("$ret");
+          if (ret == false) {
+            Get.offAndToNamed(Routes.signin);
+            return NavigationActionPolicy.CANCEL;
+          }
         }
         return NavigationActionPolicy.ALLOW;
       },
@@ -185,6 +202,7 @@ class InAppWebpage extends StatelessWidget {
             context: Get.context!,
             content: "加載出錯,是否重新加載",
             confirm: () {
+              Get.back();
               inAppWebCtl.webViewController!.reload();
             },
             candel: () {
@@ -195,8 +213,8 @@ class InAppWebpage extends StatelessWidget {
       onProgressChanged: (controller, progress) {
         inAppWebCtl.progress.value = progress / 100;
         if (progress == 100) {
-          inAppWebCtl.pullToRefreshController.endRefreshing();
           inAppWebCtl.setWebCookie();
+          inAppWebCtl.pullToRefreshController.endRefreshing();
           inAppWebCtl.webViewController!.evaluateJavascript(
               source:
                   'document.getElementsByClassName("elementor-widget-heading")[0].style.display="none";');

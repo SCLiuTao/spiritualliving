@@ -20,12 +20,6 @@ class Config {
   ///登录请求地址
   static String loginUrl = "api/flutter.php";
 
-  ///google验证后本地储存的键名
-  static String googleLoginData = "googleLoginData";
-
-  ///google验证后本地储存的键名
-  static String appleLoginData = "appleLoginData";
-
   ///远程登录后本地储存的键名
   static String loginInfo = "loginInfo";
 
