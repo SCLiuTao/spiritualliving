@@ -47,6 +47,7 @@ class InAppController extends GetxController {
       },
     );
     checkLogged();
+    getCookies();
     super.onInit();
   }
 

@@ -143,7 +143,7 @@ class InAppWebpage extends StatelessWidget {
             });
           }
         }
-        log("${jsonDecode(storageManage.read(Config.loginInfo))}");
+        // log("${jsonDecode(storageManage.read(Config.loginInfo))}");
         inAppWebCtl.clearCookies().then((value) {
           inAppWebCtl.currentIndex.value = 0;
           inAppWebCtl.webViewController!
@@ -167,7 +167,7 @@ class InAppWebpage extends StatelessWidget {
       onLoadStart: (controller, url) {
         inAppWebCtl.showToTopBtn.value = false;
 
-        log("加载完成：$url");
+        //log("加载完成：$url");
       },
       androidOnPermissionRequest: (controller, origin, resources) async {
         return PermissionRequestResponse(
@@ -177,13 +177,29 @@ class InAppWebpage extends StatelessWidget {
       shouldOverrideUrlLoading: (controller, navigationAction) async {
         var uri = navigationAction.request.url!;
         if (uri.path.contains("logout")) {
+          final StorageManage storageManage = StorageManage();
+          final String? loginInfoJson = storageManage.read(Config.loginInfo);
+          if (loginInfoJson != null) {
+            var loginInfo = jsonDecode(loginInfoJson);
+            loginInfo['islogin'] = false;
+            storageManage.save(Config.loginInfo, jsonEncode(loginInfo));
+          }
+
           Get.offAndToNamed(Routes.signin);
           return NavigationActionPolicy.CANCEL;
         }
+
         if (uri.path.contains("my-account")) {
           bool ret = await inAppWebCtl.getCookies();
-          log("$ret");
+
           if (ret == false) {
+            final StorageManage storageManage = StorageManage();
+            final String? loginInfoJson = storageManage.read(Config.loginInfo);
+            if (loginInfoJson != null) {
+              var loginInfo = jsonDecode(loginInfoJson);
+              loginInfo['islogin'] = false;
+              storageManage.save(Config.loginInfo, jsonEncode(loginInfo));
+            }
             Get.offAndToNamed(Routes.signin);
             return NavigationActionPolicy.CANCEL;
           }
@@ -191,7 +207,6 @@ class InAppWebpage extends StatelessWidget {
         return NavigationActionPolicy.ALLOW;
       },
       onLoadStop: (controller, url) async {
-        log("加载完成");
         inAppWebCtl.pullToRefreshController.endRefreshing();
       },
       onLoadError: (controller, url, code, message) {
@@ -219,12 +234,12 @@ class InAppWebpage extends StatelessWidget {
               source:
                   'document.getElementsByClassName("elementor-widget-heading")[0].style.display="none";');
         }
-        log("加载进度：${progress / 100}");
+        //log("加载进度：${progress / 100}");
       },
       onUpdateVisitedHistory: (controller, url, androidIsReload) {},
       onConsoleMessage: (controller, consoleMessage) {},
       onScrollChanged: (controller, x, y) {
-        log("滑动位置：${[x, y]}");
+        //log("滑动位置：${[x, y]}");
         if (y > 500) {
           inAppWebCtl.showToTopBtn.value = true;
         } else {

@@ -291,8 +291,12 @@ class SignInController extends GetxController
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName
         ],
+        webAuthenticationOptions: WebAuthenticationOptions(
+          clientId: "service.spiritualliving",
+          redirectUri: Uri.parse(
+              "https://spiritual-living-auth.firebaseapp.com/__/auth/handler"),
+        ),
       );
-
       final OAuthProvider oAuthProvider = OAuthProvider('apple.com');
       final credential = oAuthProvider.credential(
         idToken: appleIdCredential.identityToken,
@@ -313,6 +317,7 @@ class SignInController extends GetxController
         return null;
       }
     } catch (e) {
+      print('====>用户登录成功：$e');
       showError("驗證失敗");
       return null;
     }
