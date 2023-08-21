@@ -21,7 +21,7 @@ class AppPages {
     GetPage(
       name: Routes.webpage,
       page: () => WebPage(),
-      binding: HomeBinding(),
+      binding: WebBinding(),
     ),
     GetPage(
       name: Routes.inAppWeb,

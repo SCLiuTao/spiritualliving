@@ -2,7 +2,7 @@ import 'package:get/get.dart';
 
 import '../controller/web_controller.dart';
 
-class HomeBinding implements Bindings {
+class WebBinding implements Bindings {
   @override
   void dependencies() {
     Get.lazyPut<WebController>(
