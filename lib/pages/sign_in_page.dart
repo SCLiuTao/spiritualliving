@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../common/config.dart';
 import '../common/style/style.dart';
@@ -37,8 +40,25 @@ class SignIn extends StatelessWidget {
                       .chain(CurveTween(curve: Curves.linear))
                       .animate(signInCtl.animationController),
                   child: Container(
-                      constraints: const BoxConstraints(maxHeight: 200.0),
-                      child: Image.asset("assets/splash.png")),
+                      alignment: Alignment.center,
+                      constraints: const BoxConstraints(
+                          maxHeight: 200.0, minHeight: 150.0),
+                      child: Shimmer.fromColors(
+                        baseColor: Colors.white,
+                        highlightColor: Colors.green,
+                        child: Text(
+                          "登錄",
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineLarge!
+                              .copyWith(
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: 5,
+                              ),
+                        ),
+                      )
+                      //Image.asset("assets/splash.png"),
+                      ),
                 ),
                 const SizedBox(
                   height: 20,
@@ -136,51 +156,51 @@ class SignIn extends StatelessWidget {
                         ),
 
                         ///脸书登录
-                        FormHelper.submitUIButton(
-                          context,
-                          title: "Facebook登錄",
-                          icon: ColorFiltered(
-                            colorFilter: const ColorFilter.mode(
-                                Colors.white, BlendMode.srcIn),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(28),
-                              clipBehavior: Clip.antiAlias,
-                              child: const Image(
-                                image: AssetImage("assets/facebook.png"),
-                                height: 30.0,
-                                width: 30.0,
-                              ),
-                            ),
-                          ),
-                          color: const Color.fromARGB(255, 52, 6, 138),
-                          onTap: () async {
-                            signInCtl.handleSignIn(loginType: "facebook");
-                          },
-                        ),
+                        // FormHelper.submitUIButton(
+                        //   context,
+                        //   title: "Facebook登錄",
+                        //   icon: ColorFiltered(
+                        //     colorFilter: const ColorFilter.mode(
+                        //         Colors.white, BlendMode.srcIn),
+                        //     child: ClipRRect(
+                        //       borderRadius: BorderRadius.circular(28),
+                        //       clipBehavior: Clip.antiAlias,
+                        //       child: const Image(
+                        //         image: AssetImage("assets/facebook.png"),
+                        //         height: 30.0,
+                        //         width: 30.0,
+                        //       ),
+                        //     ),
+                        //   ),
+                        //   color: const Color.fromARGB(255, 52, 6, 138),
+                        //   onTap: () async {
+                        //     signInCtl.handleSignIn(loginType: "facebook");
+                        //   },
+                        // ),
 
                         ///IOS Apple ID登录
-
-                        FormHelper.submitUIButton(
-                          context,
-                          title: "Apple登錄",
-                          icon: ColorFiltered(
-                            colorFilter: const ColorFilter.mode(
-                                Colors.white, BlendMode.srcIn),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(28),
-                              clipBehavior: Clip.hardEdge,
-                              child: const Image(
-                                image: AssetImage("assets/apple.png"),
-                                height: 30.0,
-                                width: 30.0,
+                        if (Platform.isIOS)
+                          FormHelper.submitUIButton(
+                            context,
+                            title: "Apple登錄",
+                            icon: ColorFiltered(
+                              colorFilter: const ColorFilter.mode(
+                                  Colors.white, BlendMode.srcIn),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(28),
+                                clipBehavior: Clip.hardEdge,
+                                child: const Image(
+                                  image: AssetImage("assets/apple.png"),
+                                  height: 30.0,
+                                  width: 30.0,
+                                ),
                               ),
                             ),
+                            color: Colors.black87,
+                            onTap: () async {
+                              signInCtl.handleSignIn(loginType: "apple");
+                            },
                           ),
-                          color: Colors.black87,
-                          onTap: () async {
-                            signInCtl.handleSignIn(loginType: "apple");
-                          },
-                        ),
 
                         FormHelper.submitUIButton(
                           context,
@@ -198,7 +218,7 @@ class SignIn extends StatelessWidget {
                               ),
                             ),
                           ),
-                          color: const Color(0xFF00aced),
+                          color: const Color.fromARGB(255, 3, 109, 148),
                           onTap: () async {
                             signInCtl.handleSignIn(loginType: "twitter");
                           },
