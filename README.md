@@ -158,7 +158,6 @@ Future<User?> signInWithApple() async {
         return null;
       }
     } catch (e) {
-      print('====>用户登录成功：$e');
       showError("驗證失敗");
       return null;
     }
