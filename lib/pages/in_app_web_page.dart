@@ -183,8 +183,13 @@ class InAppWebpage extends StatelessWidget {
             loginInfo['islogin'] = false;
             storageManage.save(Config.loginInfo, jsonEncode(loginInfo));
           }
+          inAppWebCtl.clearCookies().then((value) {
+            inAppWebCtl.currentIndex.value = 0;
+            inAppWebCtl.webViewController!.loadUrl(
+                urlRequest: URLRequest(url: Uri.parse(Config.homeUrl)));
+            inAppWebCtl.logged.value = false;
+          });
 
-          Get.offAndToNamed(Routes.signin);
           return NavigationActionPolicy.CANCEL;
         }
 

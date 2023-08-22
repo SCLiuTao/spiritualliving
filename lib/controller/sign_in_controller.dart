@@ -291,11 +291,11 @@ class SignInController extends GetxController
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName
         ],
-        webAuthenticationOptions: WebAuthenticationOptions(
-          clientId: "service.spiritualliving",
-          redirectUri: Uri.parse(
-              "https://spiritual-living-auth.firebaseapp.com/__/auth/handler"),
-        ),
+        // webAuthenticationOptions: WebAuthenticationOptions(
+        //   clientId: "service.spiritualliving",
+        //   redirectUri: Uri.parse(
+        //       "https://cuboid-hyper-walrus.glitch.me/callbacks/sign_in_with_apple"),
+        // ),
       );
       final OAuthProvider oAuthProvider = OAuthProvider('apple.com');
       final credential = oAuthProvider.credential(
