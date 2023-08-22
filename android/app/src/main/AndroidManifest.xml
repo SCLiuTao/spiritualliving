@@ -36,8 +36,7 @@
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
             android:label="@string/app_name" />
 
-        <!-- Set up the Sign in with Apple
-        activity, such that it's callable from the browser-redirect -->
+        <!-- 与Apple建立登录活动，这样它就可以从浏览器中调用-重定向 -->
         <activity
             android:name="com.aboutyou.dart_packages.sign_in_with_apple.SignInWithAppleCallback"
             android:exported="true"
@@ -46,7 +45,6 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
                 <data android:scheme="signinwithapple" />
                 <data android:path="callback" />
             </intent-filter>

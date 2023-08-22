@@ -179,28 +179,28 @@ class SignIn extends StatelessWidget {
                         // ),
 
                         ///IOS Apple ID登录
-                        if (Platform.isIOS)
-                          FormHelper.submitUIButton(
-                            context,
-                            title: "Apple登錄",
-                            icon: ColorFiltered(
-                              colorFilter: const ColorFilter.mode(
-                                  Colors.white, BlendMode.srcIn),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(28),
-                                clipBehavior: Clip.hardEdge,
-                                child: const Image(
-                                  image: AssetImage("assets/apple.png"),
-                                  height: 30.0,
-                                  width: 30.0,
-                                ),
+                        // if (Platform.isIOS)
+                        FormHelper.submitUIButton(
+                          context,
+                          title: "Apple登錄",
+                          icon: ColorFiltered(
+                            colorFilter: const ColorFilter.mode(
+                                Colors.white, BlendMode.srcIn),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(28),
+                              clipBehavior: Clip.hardEdge,
+                              child: const Image(
+                                image: AssetImage("assets/apple.png"),
+                                height: 30.0,
+                                width: 30.0,
                               ),
                             ),
-                            color: Colors.black87,
-                            onTap: () async {
-                              signInCtl.handleSignIn(loginType: "apple");
-                            },
                           ),
+                          color: Colors.black87,
+                          onTap: () async {
+                            signInCtl.handleSignIn(loginType: "apple");
+                          },
+                        ),
 
                         FormHelper.submitUIButton(
                           context,
