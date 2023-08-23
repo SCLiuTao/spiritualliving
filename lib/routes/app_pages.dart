@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../bindings/in_app_web_binding.dart';
 import '../bindings/signin_binding.dart';
 
 import '../pages/in_app_web_page.dart';
@@ -18,6 +19,7 @@ class AppPages {
     GetPage(
       name: Routes.inAppWeb,
       page: () => InAppWebpage(),
+      binding: InAppwebBinding(),
     ),
   ];
 }
