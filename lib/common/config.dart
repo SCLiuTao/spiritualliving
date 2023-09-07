@@ -28,4 +28,7 @@ class Config {
 
   ///按鈕高度
   static double buttonHeight = 48.0;
+
+  ///用户地址
+  static String mine = "api/mine.php";
 }

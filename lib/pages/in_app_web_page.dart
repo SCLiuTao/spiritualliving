@@ -1,17 +1,18 @@
 import 'dart:convert';
+import 'dart:developer';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import '../common/config.dart';
-import '../common/serivce/api_client.dart';
-import '../common/utils/ios_dialog.dart';
-import '../common/utils/storage_manage.dart';
+import '../common/utils/index.dart';
 import '../controller/in_app_web_controller.dart';
 import '../routes/app_pages.dart';
 
 class InAppWebpage extends StatelessWidget {
-  InAppWebpage({super.key});
+  final String? requerstUrl;
+  InAppWebpage({super.key, this.requerstUrl});
   final inAppWebCtl = Get.put(InAppController());
   final List<NavigationDestination> tabValues = [
     const NavigationDestination(
@@ -35,6 +36,7 @@ class InAppWebpage extends StatelessWidget {
   ];
   @override
   Widget build(BuildContext context) {
+    log(requerstUrl!);
     return WillPopScope(
       onWillPop: () async {
         return false;
@@ -51,13 +53,13 @@ class InAppWebpage extends StatelessWidget {
   //主视图
   Widget _mainBuildView() {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Obx(() => Text(tabValues[inAppWebCtl.currentIndex.value].label)),
-        actions: [
-          Obx(() => inAppWebCtl.logged.value ? _buildSetView() : Container())
-        ],
-      ),
+      // appBar: AppBar(
+      //   automaticallyImplyLeading: false,
+      //   title: Obx(() => Text(tabValues[inAppWebCtl.currentIndex.value].label)),
+      //   actions: [
+      //     Obx(() => inAppWebCtl.logged.value ? _buildSetView() : Container())
+      //   ],
+      // ),
       floatingActionButton: Obx(
         () => Visibility(
           visible: inAppWebCtl.showToTopBtn.value,
@@ -78,86 +80,19 @@ class InAppWebpage extends StatelessWidget {
       body: SafeArea(
         child: _buildWebview(),
       ),
-      bottomNavigationBar: _buildNavigationBar(),
-    );
-  }
-
-  ///設置視圖
-  Widget _buildSetView() {
-    return PopupMenuButton(
-      color: Colors.grey[900],
-      icon: const Icon(
-        Icons.settings,
-        color: Colors.white,
-      ),
-      itemBuilder: (BuildContext context) {
-        return <PopupMenuEntry<String>>[
-          PopupMenuItem<String>(
-            value: 'logout',
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Icon(
-                  Icons.logout,
-                  color: Colors.red,
-                ),
-                Text(
-                  '登出',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ],
-            ),
-          ),
-          PopupMenuItem<String>(
-            value: 'delAccount',
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Icon(
-                  Icons.power_settings_new,
-                  color: Colors.redAccent,
-                ),
-                Text(
-                  '注銷',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ],
-            ),
-          )
-        ];
-      },
-      onSelected: (value) async {
-        inAppWebCtl.logged.value = false;
-        final StorageManage storageManage = StorageManage();
-        final String? loginInfoJson = storageManage.read(Config.loginInfo);
-        if (loginInfoJson != null) {
-          var loginInfo = jsonDecode(loginInfoJson);
-          loginInfo['islogin'] = false;
-          storageManage.save(Config.loginInfo, jsonEncode(loginInfo));
-          if (value == "delAccount") {
-            final ApiClient apiClient = ApiClient();
-            apiClient.post(path: Config.loginUrl, data: {
-              "loginType": "delAccount",
-              "userID": loginInfo["userID"]
-            });
-          }
-        }
-        // log("${jsonDecode(storageManage.read(Config.loginInfo))}");
-        inAppWebCtl.clearCookies().then((value) {
-          inAppWebCtl.currentIndex.value = 0;
-          inAppWebCtl.webViewController!
-              .loadUrl(urlRequest: URLRequest(url: Uri.parse(Config.homeUrl)));
-        });
-      },
+      //bottomNavigationBar: _buildNavigationBar(),
     );
   }
 
   ///webview視圖
   Widget _buildWebview() {
     return InAppWebView(
-      key: inAppWebCtl.webViewKey,
-      initialUrlRequest:
-          URLRequest(url: Uri.parse("https://www.spiritual-living.net")),
+      key: Get.nestedKey("$requerstUrl"),
+      initialUrlRequest: URLRequest(url: Uri.parse(requerstUrl!)),
+      gestureRecognizers: {
+        Factory<VerticalDragGestureRecognizer>(
+            () => VerticalDragGestureRecognizer())
+      },
       initialOptions: inAppWebCtl.options,
       pullToRefreshController: inAppWebCtl.pullToRefreshController,
       onWebViewCreated: (controller) {
@@ -214,20 +149,21 @@ class InAppWebpage extends StatelessWidget {
         inAppWebCtl.pullToRefreshController.endRefreshing();
       },
       onLoadError: (controller, url, code, message) {
+        log(message);
         inAppWebCtl.showToTopBtn.value = false;
         inAppWebCtl.progress.value = 1.0;
         inAppWebCtl.pullToRefreshController.endRefreshing();
-        iosDialog(
-            context: Get.context!,
-            content: "加載出錯,是否重新加載",
-            confirm: () {
-              Get.back();
-              inAppWebCtl.webViewController!.reload();
-            },
-            candel: () {
-              Get.back();
-              Get.offAndToNamed(Routes.signin);
-            });
+        // iosDialog(
+        //     context: Get.context!,
+        //     content: "加載出錯,是否重新加載",
+        //     confirm: () {
+        //       Get.back();
+        //       inAppWebCtl.webViewController!.reload();
+        //     },
+        //     candel: () {
+        //       Get.back();
+        //       Get.offAndToNamed(Routes.signin);
+        //     });
       },
       onProgressChanged: (controller, progress) {
         inAppWebCtl.progress.value = progress / 100;
@@ -256,59 +192,7 @@ class InAppWebpage extends StatelessWidget {
   ///加载视图
   Widget _buildLoadingView() {
     return Obx(
-      () => inAppWebCtl.progress.value < 1.0
-          ? SizedBox(
-              width: double.infinity,
-              height: double.infinity,
-              child: Stack(
-                children: [
-                  Opacity(
-                      opacity: .9,
-                      child: ModalBarrier(
-                          dismissible: false,
-                          color: Colors.black.withOpacity(0.5))),
-                  const Center(
-                    child: SpinKitFadingCube(
-                      color: Colors.orange,
-                      size: 50.0,
-                    ),
-                  ),
-                ],
-              ),
-            )
-          : Container(),
-    );
-  }
-
-  ///导航视图
-  Widget _buildNavigationBar() {
-    return Obx(
-      () => NavigationBar(
-        backgroundColor: const Color.fromARGB(255, 141, 63, 155),
-        selectedIndex: inAppWebCtl.currentIndex.value,
-        indicatorColor: Colors.green,
-        destinations: tabValues,
-        onDestinationSelected: (index) async {
-          if (index != inAppWebCtl.currentIndex.value) {
-            inAppWebCtl.showToTopBtn.value = false;
-            await inAppWebCtl.setWebCookie();
-            if (index == 0) {
-              inAppWebCtl.webViewController!.loadUrl(
-                  urlRequest: URLRequest(url: Uri.parse(Config.homeUrl)));
-            } else if (index == 1) {
-              inAppWebCtl.webViewController!.loadUrl(
-                  urlRequest: URLRequest(url: Uri.parse(Config.shopUrl)));
-            } else if (index == 2) {
-              inAppWebCtl.webViewController!.loadUrl(
-                  urlRequest: URLRequest(url: Uri.parse(Config.cartUrl)));
-            } else if (index == 3) {
-              inAppWebCtl.webViewController!.loadUrl(
-                  urlRequest: URLRequest(url: Uri.parse(Config.persionUrl)));
-            }
-          }
-          inAppWebCtl.currentIndex.value = index;
-        },
-      ),
+      () => inAppWebCtl.progress.value < 1.0 ? spinkitWiget() : Container(),
     );
   }
 }

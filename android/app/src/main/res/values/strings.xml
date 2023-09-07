@@ -2,5 +2,6 @@
 <resources>
     <string name="app_name">Spiritual Living</string>
     <string name="facebook_app_id">1055119652144477</string>
-    <string name="facebook_client_token">530299299d756dbf64defc20ba61d7c4</string>
+    <string name="fb_login_protocol_scheme">fb1055119652144477</string>
+    <string name="facebook_client_token">31b49b811481ca437be7161963d2f7b3</string>
 </resources>

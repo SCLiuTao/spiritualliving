@@ -19,8 +19,8 @@ class SignInController extends GetxController
     with GetSingleTickerProviderStateMixin {
   StorageManage storageManage = StorageManage();
   GlobalKey<FormState> formkey = GlobalKey<FormState>();
-  final TextEditingController nameCtl = TextEditingController();
-  final TextEditingController pwdCtl = TextEditingController();
+  TextEditingController nameCtl = TextEditingController();
+  TextEditingController pwdCtl = TextEditingController();
   RxBool isShowPassword = true.obs;
   late AnimationController animationController;
 
@@ -45,6 +45,8 @@ class SignInController extends GetxController
   @override
   void onClose() {
     animationController.dispose();
+    nameCtl.dispose();
+    pwdCtl.dispose();
     super.onClose();
   }
 
@@ -78,9 +80,7 @@ class SignInController extends GetxController
           User? user = auth.user;
           if (user != null) {
             googleWithSignOut();
-            String? displayName = user.displayName!
-                .replaceAll(RegExp(r'\s+'), " ")
-                .replaceAll(" ", "-");
+            String? displayName = user.displayName;
             String? email = user.email;
             loginData = {
               "displayName": displayName,
@@ -95,9 +95,7 @@ class SignInController extends GetxController
           User? user = auth.user;
           if (user != null) {
             facebookWithSignOut();
-            String? displayName = user.displayName!
-                .replaceAll(RegExp(r'\s+'), " ")
-                .replaceAll(" ", "-");
+            String? displayName = user.displayName;
             String? email = user.email;
             loginData = {
               "displayName": displayName,
@@ -134,7 +132,7 @@ class SignInController extends GetxController
         String name = nameCtl.text;
         String pwd = pwdCtl.text;
         loginData = {
-          "displayName": name,
+          "email": name,
           "pwd": pwd,
           "loginType": loginType,
         };
@@ -148,6 +146,7 @@ class SignInController extends GetxController
         );
       }
     } catch (e) {
+      print("===========>$e");
       if (loginType == "google") {
         googleWithSignOut();
       }
@@ -178,7 +177,7 @@ class SignInController extends GetxController
       if (remoteLoginRet["code"] == 200) {
         saveRemoteInfo(remoteData: remoteLoginRet, loginType: loginType);
 
-        Get.offAndToNamed(Routes.inAppWeb);
+        Get.offAndToNamed(Routes.dashboard);
       } else if (remoteLoginRet["code"] == 202) {
         //只有普通註冊時，賬號不存在才返回202
         iosDialog(
@@ -192,6 +191,9 @@ class SignInController extends GetxController
               }
               remoteLogin(data: data, loginType: "normal"); //再次調用遠程登錄
             });
+      } else if (remoteLoginRet["code"] == 203) {
+        //只有普通登录時，账号或密码错误返回2.3
+        showError("賬號或密碼錯誤");
       } else {
         if (loginType == "google") {
           googleWithSignOut();
@@ -251,7 +253,8 @@ class SignInController extends GetxController
   /// facebook登錄
   Future<UserCredential?> signInWithFacebook() async {
     final LoginResult loginResult = await FacebookAuth.instance.login();
-    //print("===========>${loginResult.status}");
+
+    print("===========>${loginResult.status}");
     if (loginResult.status == LoginStatus.cancelled) {
       showError("用戶取消登錄");
       return null;

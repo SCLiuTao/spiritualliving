@@ -83,8 +83,6 @@ class ApiClient {
   factory ApiClient() => _instance;
 
   static BaseOptions baseOptions = BaseOptions(
-    // connectTimeout: const Duration(seconds: 5),
-    // receiveTimeout: const Duration(seconds: 5),
     contentType: "application/x-www-form-urlencoded",
     responseType: ResponseType.plain,
   );

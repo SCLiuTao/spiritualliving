@@ -4,28 +4,23 @@ import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../common/config.dart';
-import '../common/style/style.dart';
 import '../common/utils/form_help.dart';
 import '../controller/sign_in_controller.dart';
 
 class SignIn extends StatelessWidget {
   SignIn({super.key});
-  final signInCtl = Get.find<SignInController>();
+  final signInCtl = Get.put(SignInController());
   @override
   Widget build(BuildContext context) {
-    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-    //   signInCtl.checkLogin();
-    // });
     final paddingTop = MediaQuery.of(context).padding.top;
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: Container(
         padding: EdgeInsets.only(
           top: paddingTop,
-          left: Get.width * 0.08,
-          right: Get.width * 0.08,
+          left: Get.width * 0.04,
+          right: Get.width * 0.04,
         ),
-        decoration: boxLinear,
         width: double.infinity,
         height: double.infinity,
         child: Form(
@@ -42,16 +37,17 @@ class SignIn extends StatelessWidget {
                       constraints: const BoxConstraints(
                           maxHeight: 200.0, minHeight: 150.0),
                       child: Shimmer.fromColors(
-                        baseColor: Colors.white,
-                        highlightColor: Colors.green,
+                        baseColor:
+                            const Color.fromARGB(255, 46, 37, 88).withGreen(20),
+                        highlightColor: Colors.orangeAccent,
                         child: Text(
                           "登錄",
                           style: Theme.of(context)
                               .textTheme
-                              .headlineLarge!
+                              .displayMedium!
                               .copyWith(
-                                fontWeight: FontWeight.w500,
-                                letterSpacing: 5,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 8,
                               ),
                         ),
                       )
@@ -101,7 +97,6 @@ class SignIn extends StatelessWidget {
                             suffixIcon: Padding(
                               padding: const EdgeInsets.only(right: 8.0),
                               child: IconButton(
-                                color: Colors.white70,
                                 icon: signInCtl.isShowPassword.value
                                     ? const Icon(Icons.visibility)
                                     : const Icon(Icons.visibility_off),
@@ -120,7 +115,7 @@ class SignIn extends StatelessWidget {
                           title: "賬號密碼登錄",
                           icon: const Icon(Icons.email),
                           textColor: Colors.black87,
-                          //color: Colors.grey[600],
+                          color: Colors.green,
                           onTap: () {
                             FocusScope.of(context).unfocus();
                             var currentState = signInCtl.formkey.currentState;
@@ -147,37 +142,37 @@ class SignIn extends StatelessWidget {
                               ),
                             ),
                           ),
-                          color: const Color.fromARGB(66, 18, 7, 170),
+                          color: const Color.fromARGB(255, 175, 106, 2),
                           onTap: () async {
                             signInCtl.handleSignIn(loginType: "google");
                           },
                         ),
 
                         ///脸书登录
-                        // FormHelper.submitUIButton(
-                        //   context,
-                        //   title: "Facebook登錄",
-                        //   icon: ColorFiltered(
-                        //     colorFilter: const ColorFilter.mode(
-                        //         Colors.white, BlendMode.srcIn),
-                        //     child: ClipRRect(
-                        //       borderRadius: BorderRadius.circular(28),
-                        //       clipBehavior: Clip.antiAlias,
-                        //       child: const Image(
-                        //         image: AssetImage("assets/facebook.png"),
-                        //         height: 30.0,
-                        //         width: 30.0,
-                        //       ),
-                        //     ),
-                        //   ),
-                        //   color: const Color.fromARGB(255, 52, 6, 138),
-                        //   onTap: () async {
-                        //     signInCtl.handleSignIn(loginType: "facebook");
-                        //   },
-                        // ),
+                        FormHelper.submitUIButton(
+                          context,
+                          title: "Facebook登錄",
+                          icon: ColorFiltered(
+                            colorFilter: const ColorFilter.mode(
+                                Colors.white, BlendMode.srcIn),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(28),
+                              clipBehavior: Clip.antiAlias,
+                              child: const Image(
+                                image: AssetImage("assets/facebook.png"),
+                                height: 30.0,
+                                width: 30.0,
+                              ),
+                            ),
+                          ),
+                          color: const Color.fromARGB(255, 52, 6, 138),
+                          onTap: () async {
+                            signInCtl.handleSignIn(loginType: "facebook");
+                          },
+                        ),
 
                         ///IOS Apple ID登录
-                        // if (Platform.isIOS)
+
                         FormHelper.submitUIButton(
                           context,
                           title: "Apple登錄",

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -9,7 +8,7 @@ import '../common/utils/storage_manage.dart';
 
 class InAppController extends GetxController {
   final StorageManage storageManage = StorageManage();
-  final GlobalKey webViewKey = GlobalKey();
+  // final GlobalKey webViewKey = GlobalKey();
   RxInt currentIndex = 0.obs;
   CookieManager cookieManager = CookieManager.instance();
   InAppWebViewController? webViewController;
@@ -75,7 +74,6 @@ class InAppController extends GetxController {
     bool ret = false;
     List<Cookie> cookies =
         await cookieManager.getCookies(url: Uri.parse(Config.baseUrl));
-    log("$cookies");
     for (var element in cookies) {
       if (element.name.contains("wordpress_logged_in_")) {
         ret = true;

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:spiritualliving/common/config.dart';
 
 class FormHelper {
-  static TextFormField textInput({
+  static Widget textInput({
     required TextEditingController controller,
     IconData? icon,
     required String labelText,
@@ -12,48 +12,40 @@ class FormHelper {
     bool? obscureText = false,
     int? maxLines = 1,
     bool? floatingLabelBehavior = true,
+    TextInputAction? textInputAction = TextInputAction.next,
     void Function(String)? onChanged,
+    void Function()? onTap,
+    void Function(String?)? onSaved,
+    bool readOnly = false,
+    void Function(String)? onFieldSubmitted,
   }) {
     return TextFormField(
       autovalidateMode: AutovalidateMode.onUserInteraction,
-      cursorColor: Colors.white,
+      textInputAction: textInputAction,
       controller: controller,
       keyboardType: keyboardType,
       obscureText: obscureText!,
-      style: TextStyle(color: Colors.white.withOpacity(.9), fontSize: 18.0),
+      style: const TextStyle(fontSize: 18.0),
       decoration: InputDecoration(
-        contentPadding: const EdgeInsets.all(12),
-        prefixIcon: icon != null
-            ? Icon(
-                icon,
-                size: 26,
-                color: Colors.white.withOpacity(.9),
-              )
-            : null,
-        errorStyle:
-            const TextStyle(color: Color.fromARGB(255, 97, 8, 2), fontSize: 16),
+        errorStyle: const TextStyle(fontSize: 14),
         suffixIcon: suffixIcon,
         labelText: labelText,
-        hintText: labelText,
-        hintStyle:
-            TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 16),
-        labelStyle:
-            TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 16),
-        filled: true,
-        floatingLabelBehavior:
-            floatingLabelBehavior == true ? FloatingLabelBehavior.never : null,
-        fillColor: Colors.white.withOpacity(0.3),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30.0),
-          borderSide: const BorderSide(
-            width: 0,
-            style: BorderStyle.none,
-          ),
+        //hintText: labelText,
+        hintStyle: const TextStyle(fontSize: 16),
+        labelStyle: const TextStyle(fontSize: 16),
+        enabledBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey[300]!),
         ),
+        // floatingLabelBehavior:
+        //     floatingLabelBehavior == true ? FloatingLabelBehavior.never : null,
       ),
       validator: validator,
       maxLines: maxLines,
       onChanged: onChanged,
+      onTap: onTap,
+      onSaved: onSaved,
+      onFieldSubmitted: onFieldSubmitted,
+      readOnly: readOnly,
     );
   }
 
@@ -127,7 +119,7 @@ class FormHelper {
       iconEnabledColor: Colors.white,
       iconDisabledColor: Colors.grey[800],
       decoration: InputDecoration(
-        contentPadding: const EdgeInsets.all(16),
+        contentPadding: const EdgeInsets.all(18),
         prefixIcon: Icon(
           prefixIcon,
           size: 30,

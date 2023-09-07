@@ -57,14 +57,14 @@
 				<key>CFBundleURLSchemes</key>
 				<array>
 					<string>com.googleusercontent.apps.539015066127-j2g2r6ja840q6a5n28eec8ub23qkrvcn</string>
-					<string>fb1705665313211623</string>
+					<string>fb1055119652144477</string>
 				</array>
 			</dict>
 		</array>
 		<key>FacebookAppID</key>
-		<string>1705665313211623</string>
+		<string>1055119652144477</string>
 		<key>FacebookClientToken</key>
-		<string>c121dc436f78287fb98b3ad7b7253da7</string>
+		<string>31b49b811481ca437be7161963d2f7b3</string>
 		<key>FacebookDisplayName</key>
 		<string>Spiritual Living</string>
 		<key>LSApplicationQueriesSchemes</key>
