@@ -168,7 +168,7 @@ class CustomerAddressController extends GetxController {
               : userMetaData?.shippingState ?? "";
           city.text = arguments["type"] == "billing"
               ? userMetaData?.billingCity ?? ""
-              : userMetaData?.shippingCountry ?? "";
+              : userMetaData?.shippingCity ?? "";
           address1.text = arguments["type"] == "billing"
               ? userMetaData?.billingAddress1 ?? ""
               : userMetaData?.shippingAddress1 ?? "";

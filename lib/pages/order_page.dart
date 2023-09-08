@@ -72,6 +72,8 @@ class OrderPage extends GetView<OrderController> {
                           color: Colors.grey[500],
                         ),
                         onTap: () => showBarModalBottomSheet(
+                          expand: false,
+                          enableDrag: false,
                           context: context,
                           builder: (context) => OrderDetailPage(
                             ordersModel: item,
